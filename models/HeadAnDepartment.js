@@ -7,6 +7,7 @@ const HeadAnDepartmentSchema = new mongoose.Schema({
         ref: "Depertment",
     },
     DepartmentHeadName: { type: String, trim: true },
+    DepartmentName:{ type: String, trim: true },
     email: { type: String, trim: true },
     mobile: { type: String, trim: true },
 });

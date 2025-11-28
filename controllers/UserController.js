@@ -194,6 +194,7 @@ exports.createHeadADepartment = async (req, res) => {
         const newHead = new HeadAnDepartment({
             departmentId: findDepartment._id,
             DepartmentHeadName,
+            DepartmentName,
             email,
             mobile
         })
