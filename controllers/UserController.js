@@ -1,5 +1,6 @@
 const User = require("../models/UsersModels");
-const jwt = require("jsonwebtoken")
+const jwt = require("jsonwebtoken");
+const Depertment = require("../models/DepertmentModel");
 
 exports.createSuperAdmin = async (req, res) => {
     try {
@@ -67,7 +68,7 @@ exports.login = async (req, res) => {
         const token = jwt.sign({ userId: user._id }, "Vanaras", { expiresIn: "24h" })
 
         res.status(200).json({
-            message: 'Super admin logged in successfully',
+            message: ' logged in successfully',
             success: true,
             user: {
                 id: user._id,
@@ -79,7 +80,77 @@ exports.login = async (req, res) => {
         });
 
     } catch (error) {
-        console.error('Error logging in super admin:', error);
+        console.error('Error logging in :', error);
+        res.status(500).json({
+            message: `Internal Server Error Or ${error.message}`,
+            success: false
+        });
+    }
+};
+
+// Create Depertment
+exports.createDepartment = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+
+        if (!userId) {
+            return res.status(200).json({
+                success: false,
+                message: "Please Provide UserId"
+            })
+        }
+
+        const { DepartmentName } = req.body;
+        if (!DepartmentName) {
+            return res.status(200).json({
+                success: false,
+                message: "Please Provide DepartmentName"
+            })
+        }
+
+        // create Department
+        const newDepartment = new Depertment({
+            DepartmentName,
+        });
+
+        await newDepartment.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Department Created SuccessFully"
+        })
+
+    } catch (error) {
+        console.log(error, error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server Error in createDepartment"
+        })
+    }
+};
+
+// fetch All Department
+exports.fetchAllDepartment = async (req, res) => {
+    try {
+        //No Need for userId;
+
+        const allDepartment = await Depertment.find({});
+        if(allDepartment.length === 0){
+            return res.status(200).json({
+                success:false,
+                message:"No data found"
+            })
+        }
+
+        return res.status(200).json({
+            success:true,
+            message:"Fetched All Department SuccessFully",
+            count:allDepartment.length,
+            allDepartment,
+        })
+
+    } catch (error) {
+        console.error('Error fetchAllDepartment:', error);
         res.status(500).json({
             message: `Internal Server Error Or ${error.message}`,
             success: false
