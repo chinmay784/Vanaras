@@ -1,6 +1,7 @@
 const User = require("../models/UsersModels");
 const jwt = require("jsonwebtoken");
 const Depertment = require("../models/DepertmentModel");
+const HeadAnDepartment = require("../models/HeadAnDepartment");
 
 exports.createSuperAdmin = async (req, res) => {
     try {
@@ -135,22 +136,123 @@ exports.fetchAllDepartment = async (req, res) => {
         //No Need for userId;
 
         const allDepartment = await Depertment.find({});
-        if(allDepartment.length === 0){
+        if (allDepartment.length === 0) {
             return res.status(200).json({
-                success:false,
-                message:"No data found"
+                success: false,
+                message: "No data found"
             })
         }
 
         return res.status(200).json({
-            success:true,
-            message:"Fetched All Department SuccessFully",
-            count:allDepartment.length,
+            success: true,
+            message: "Fetched All Department SuccessFully",
+            count: allDepartment.length,
             allDepartment,
         })
 
     } catch (error) {
         console.error('Error fetchAllDepartment:', error);
+        res.status(500).json({
+            message: `Internal Server Error Or ${error.message}`,
+            success: false
+        });
+    }
+};
+
+
+// this for any one Department Head create logic
+exports.createHeadADepartment = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+
+        if (!userId) {
+            return res.status(200).json({
+                success: false,
+                message: "Please Provide userId"
+            })
+        };
+
+        const { DepartmentHeadName, email, mobile, DepartmentName } = req.body;
+        if (!DepartmentHeadName || !DepartmentName || !email || !mobile) {
+            return res.status(200).json({
+                success: false,
+                message: "Please Provide DepartmentHeadName and DepartmentName or email or mobile"
+            })
+        };
+
+        //find Department on basis of DepartmentName
+        const findDepartment = await Depertment.findOne({ DepartmentName });
+
+        if (!findDepartment) {
+            return res.status(200).json({
+                success: false,
+                message: "No Depertment Found"
+            })
+        };
+
+        // Create Head
+        const newHead = new HeadAnDepartment({
+            departmentId: findDepartment._id,
+            DepartmentHeadName,
+            email,
+            mobile
+        })
+
+        await newHead.save();
+
+        // also save in user Collections
+        await User.create({
+            userName: DepartmentHeadName,
+            email,
+            password: mobile,
+            role: DepartmentName
+        })
+
+        return res.status(200).json({
+            success: true,
+            message: " HeadADepartment Create Successfully",
+        })
+
+    } catch (error) {
+        console.error('Error createHeadADepartment:', error);
+        res.status(500).json({
+            message: `Internal Server Error Or ${error.message}`,
+            success: false
+        });
+    }
+};
+
+// fetch all Head Department list
+exports.fetchAllHeadDepartment = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+
+        if (!userId) {
+            return res.status(200).json({
+                success: false,
+                message: "Please Provide userId"
+            })
+        };
+
+
+        // fetc All HeadDepartment list
+        const head = await HeadAnDepartment.find({});
+
+        if (head.length === 0) {
+            return res.status(200).json({
+                success: false,
+                message: "No data found"
+            })
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: " HeadADepartment Fetched Successfully",
+            head,
+        })
+
+    } catch (error) {
+        console.error('Error fetchAllHeadDepartment:', error);
         res.status(500).json({
             message: `Internal Server Error Or ${error.message}`,
             success: false
