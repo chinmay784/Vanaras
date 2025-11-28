@@ -2,6 +2,7 @@ const User = require("../models/UsersModels");
 const jwt = require("jsonwebtoken");
 const Depertment = require("../models/DepertmentModel");
 const HeadAnDepartment = require("../models/HeadAnDepartment");
+const Employee = require("../models/EmployeeModel")
 
 exports.createSuperAdmin = async (req, res) => {
     try {
@@ -206,7 +207,8 @@ exports.createHeadADepartment = async (req, res) => {
             userName: DepartmentHeadName,
             email,
             password: mobile,
-            role: DepartmentName
+            role: DepartmentName,
+            headDepartmentId:userId
         })
 
         return res.status(200).json({
@@ -258,5 +260,41 @@ exports.fetchAllHeadDepartment = async (req, res) => {
             message: `Internal Server Error Or ${error.message}`,
             success: false
         });
+    }
+}
+
+
+// Add Employee Logic
+exports.addEmployee = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+
+        if (!userId) {
+            return res.status(200).json({
+                success: false,
+                message: "Please Provide UserId",
+            })
+        }
+
+        const { empName, empEmail, empMobile, } = req.body;
+
+        if (!empName || !empEmail || !empMobile) {
+            return res.status(200).json({
+                success: false,
+                message: "please Provide empName or empEmail or empMobile"
+            })
+        }
+
+        // create employee 
+        const emp = new Employee({
+            departmentHeadId
+        })
+
+    } catch (error) {
+        console.log(error, error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server Error in addEmployee"
+        })
     }
 }
