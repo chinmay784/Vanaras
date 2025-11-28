@@ -208,7 +208,7 @@ exports.createHeadADepartment = async (req, res) => {
             email,
             password: mobile,
             role: DepartmentName,
-            headDepartmentId:newHead._id,
+            headDepartmentId: newHead._id,
         })
 
         return res.status(200).json({
@@ -287,7 +287,26 @@ exports.addEmployee = async (req, res) => {
 
         // create employee 
         const emp = new Employee({
-            departmentHeadId
+            departmentHeadId: userId,
+            empName,
+            empEmail,
+            empMobile,
+        })
+
+        await emp.save();
+
+        // Save in userCollections
+        await User.create({
+            userName: empName,
+            email: empEmail,
+            password: empMobile,
+            employeeId: emp._id,
+        });
+
+
+        return res.status(200).json({
+            success: true,
+            message: "Employee added Successfully"
         })
 
     } catch (error) {
@@ -295,6 +314,51 @@ exports.addEmployee = async (req, res) => {
         return res.status(500).json({
             success: false,
             message: "Server Error in addEmployee"
+        })
+    }
+};
+
+// fetch all employee List
+exports.fetchAllEmployee = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+
+        if (!userId) {
+            return res.status(200).json({
+                success: false,
+                message: "Please Provide UserId",
+            })
+        }
+
+        // find in userCollections
+        const user = await User.findById(userId);
+        if (!user) {
+            return res.status(200).json({
+                success: false,
+                message: "User Not Found",
+            })
+        }
+
+        // find in employee collections
+        const emp = await Employee.find({ departmentHeadId: userId });
+        if (emp.length === 0) {
+            return res.status(200).json({
+                success: false,
+                message: " No Data Found",
+            })
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Fetched SuccessFully",
+            emp,
+        })
+
+    } catch (error) {
+        console.log(error, error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server Error in fetchAllEmployee"
         })
     }
 }

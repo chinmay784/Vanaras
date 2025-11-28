@@ -22,6 +22,10 @@ const UserModel = new mongoose.Schema({
     headDepartmentId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "HeadAnDepartment"
+    },
+    employeeId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Employee"
     }
 });
 
