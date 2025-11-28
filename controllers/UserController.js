@@ -208,7 +208,7 @@ exports.createHeadADepartment = async (req, res) => {
             email,
             password: mobile,
             role: DepartmentName,
-            headDepartmentId:userId
+            headDepartmentId:newHead._id,
         })
 
         return res.status(200).json({
