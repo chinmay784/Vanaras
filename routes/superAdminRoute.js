@@ -1,5 +1,5 @@
 const express = require("express");
-const { createSuperAdmin, login, createDepartment, fetchAllDepartment, createHeadADepartment, fetchAllHeadDepartment, addEmployee, fetchAllEmployee, AssignWorkToEmployee, epartment_Head_Show_Assign_work_Employee, FetchLoginEmployeeWorkList, createProduct } = require("../controllers/UserController");
+const { createSuperAdmin, login, createDepartment, fetchAllDepartment, createHeadADepartment, fetchAllHeadDepartment, addEmployee, fetchAllEmployee, AssignWorkToEmployee, epartment_Head_Show_Assign_work_Employee, FetchLoginEmployeeWorkList, createProduct, fetchProduct } = require("../controllers/UserController");
 const { authMiddelWere } = require("../middelWare/authMiddelWere");
 const router = express.Router()
 
@@ -15,5 +15,6 @@ router.post("/AssignWorkToEmployee",authMiddelWere,AssignWorkToEmployee);
 router.get("/epartment_Head_Show_Assign_work_Employee",authMiddelWere,epartment_Head_Show_Assign_work_Employee);
 router.get("/FetchLoginEmployeeWorkList",authMiddelWere,FetchLoginEmployeeWorkList);
 router.post("/createProduct",authMiddelWere,createProduct);
+router.get("/fetchProduct",authMiddelWere,fetchProduct)
 
 module.exports = router;
