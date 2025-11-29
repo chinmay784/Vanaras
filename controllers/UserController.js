@@ -3,7 +3,8 @@ const jwt = require("jsonwebtoken");
 const Depertment = require("../models/DepertmentModel");
 const HeadAnDepartment = require("../models/HeadAnDepartment");
 const Employee = require("../models/EmployeeModel");
-const AssignWork = require("../models/AssignWorkModel")
+const AssignWork = require("../models/AssignWorkModel");
+const Product = require("../models/ProductModel")
 
 exports.createSuperAdmin = async (req, res) => {
     try {
@@ -316,7 +317,7 @@ exports.addEmployee = async (req, res) => {
             userName: empName,
             email: empEmail,
             password: empMobile,
-            role: use.role,
+            role: `${use.role}-employee`,
             employeeId: emp._id,
         });
 
@@ -531,6 +532,90 @@ exports.FetchLoginEmployeeWorkList = async (req, res) => {
         return res.status(500).json({
             success: false,
             message: "Server Error in FetchLoginEmployeeWorkList"
+        })
+    }
+}
+
+
+// create Product By SuperAdmin
+exports.createProduct = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+
+        if (!userId) {
+            return res.status(200).json({
+                success: false,
+                message: 'Please Provide UserId'
+            })
+        }
+
+        const { productName, modelNo, partNo, TacNo, productType } = req.body;
+
+        if (!productName || !modelNo || !partNo || !TacNo || !productType) {
+            return res.status(200).json({
+                success: false,
+                message: 'Please Provide All Fields'
+            })
+        }
+
+        // create Product
+        const product = await Product.create({
+            createdId: userId,
+            productName,
+            modelNo,
+            partNo,
+            TacNo,
+            productType
+        })
+
+        return res.status(200).json({
+            success: true,
+            message: 'Product Created SuccessFully'
+        })
+
+    } catch (error) {
+        console.log(error, error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server Error in createProduct"
+        })
+    }
+}
+
+// fetch Product 
+exports.fetchProduct = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+
+        if (!userId) {
+            return res.status(200).json({
+                success: false,
+                message: 'Please Provide UserId'
+            })
+        }
+
+        // fetch Product list
+
+        const allProduct = await Product.find({});
+
+        if (allProduct.length === 0) {
+            return res.status(200).json({
+                success: false,
+                message: 'No Data Found'
+            })
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Fetched SuccessFully",
+            allProduct
+        })
+
+    } catch (error) {
+        console.log(error, error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server Error in createProduct"
         })
     }
 }
