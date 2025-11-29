@@ -7,8 +7,9 @@ const AssignWorkSchema = new mongoose.Schema(
         workDescription: {
             type: String, trim: true
         },
-        workAssignToId:{
-            
+        workAssignToId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "Employee",
         }
     },
     { timestamps: true }

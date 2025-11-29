@@ -10,9 +10,10 @@ const EmployeeSchema = new mongoose.Schema({
     empMobile: { type: String, trim: true },
     assignWork: [
         {
-            type: String, trim: true
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "AssignWork"
         }
     ]
 });
 
-module.exports = mongoose.model("Employee",EmployeeSchema)
+module.exports = mongoose.model("Employee", EmployeeSchema)

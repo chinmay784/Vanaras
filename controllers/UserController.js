@@ -290,6 +290,8 @@ exports.addEmployee = async (req, res) => {
             })
         }
 
+        const use = await User.findById(userId);
+
         const { empName, empEmail, empMobile, } = req.body;
 
         if (!empName || !empEmail || !empMobile) {
@@ -314,6 +316,7 @@ exports.addEmployee = async (req, res) => {
             userName: empName,
             email: empEmail,
             password: empMobile,
+            role: use.role,
             employeeId: emp._id,
         });
 
@@ -403,17 +406,52 @@ exports.AssignWorkToEmployee = async (req, res) => {
             return res.status(200).json({
                 success: false,
                 message: "Please Provide UserId",
-            })
+            });
         }
 
+        const { workTitel, workDescription, empId } = req.body;
+
+        if (!workTitel || !workDescription || !empId) {
+            return res.status(200).json({
+                success: false,
+                message: "Please Provide workTitel, workDescription, empId",
+            });
+        }
+
+        // 🔍 Check employee exist
+        const employee = await Employee.findById(empId);
+        if (!employee) {
+            return res.status(200).json({
+                success: false,
+                message: "Employee Not Found",
+            });
+        }
+
+        // 📌 Step 1: Create work assign entry
+        const workAssign = await AssignWork.create({
+            workTitel,
+            workDescription,
+            workAssignToId: empId,
+        });
+
+        // 📌 Step 2: Push assigned work ID into employee model
+        employee.assignWork.push(workAssign._id);
+        await employee.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Work Assigned Successfully",
+            data: workAssign
+        });
 
     } catch (error) {
-        console.log(error, error.message);
+        console.log("AssignWorkToEmployee Error:", error.message);
         return res.status(500).json({
             success: false,
-            message: "Server Error in AssignWorkToEmployee"
-        })
+            message: "Server Error in AssignWorkToEmployee",
+        });
     }
-}
+};
+
 
 
