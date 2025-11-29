@@ -2,7 +2,8 @@ const User = require("../models/UsersModels");
 const jwt = require("jsonwebtoken");
 const Depertment = require("../models/DepertmentModel");
 const HeadAnDepartment = require("../models/HeadAnDepartment");
-const Employee = require("../models/EmployeeModel")
+const Employee = require("../models/EmployeeModel");
+const AssignWork = require("../models/AssignWorkModel")
 
 exports.createSuperAdmin = async (req, res) => {
     try {
@@ -170,60 +171,73 @@ exports.createHeadADepartment = async (req, res) => {
             return res.status(200).json({
                 success: false,
                 message: "Please Provide userId"
-            })
-        };
+            });
+        }
 
         const { DepartmentHeadName, email, mobile, DepartmentName } = req.body;
+
         if (!DepartmentHeadName || !DepartmentName || !email || !mobile) {
             return res.status(200).json({
                 success: false,
-                message: "Please Provide DepartmentHeadName and DepartmentName or email or mobile"
-            })
-        };
+                message: "Please Provide DepartmentHeadName, DepartmentName, email & mobile"
+            });
+        }
 
-        //find Department on basis of DepartmentName
+        // 🔎 Step 1: Check Department spelling corrected
         const findDepartment = await Depertment.findOne({ DepartmentName });
 
         if (!findDepartment) {
             return res.status(200).json({
                 success: false,
-                message: "No Depertment Found"
-            })
-        };
+                message: "No Department Found"
+            });
+        }
 
-        // Create Head
-        const newHead = new HeadAnDepartment({
+        // ❗ Step 2: Prevent duplicate Head
+        const existingHead = await HeadAnDepartment.findOne({ email });
+        if (existingHead) {
+            return res.status(200).json({
+                success: false,
+                message: "This Head is already created"
+            });
+        }
+
+        // Step 3: Create new Head
+        const newHead = await HeadAnDepartment.create({
             departmentId: findDepartment._id,
             DepartmentHeadName,
             DepartmentName,
             email,
             mobile
-        })
+        });
 
-        await newHead.save();
-
-        // also save in user Collections
-        await User.create({
+        // Step 4: Create User for Head
+        const newUser = await User.create({
             userName: DepartmentHeadName,
             email,
-            password: mobile,
+            password: mobile, // ❗ replace with hashed password if needed
             role: DepartmentName,
             headDepartmentId: newHead._id,
-        })
+        });
+
+        // Step 5: Push user into Department people list + save
+        findDepartment.people.push(newUser._id);
+        await findDepartment.save();
 
         return res.status(200).json({
             success: true,
-            message: " HeadADepartment Create Successfully",
-        })
+            message: "Head of Department Created Successfully",
+        });
 
     } catch (error) {
         console.error('Error createHeadADepartment:', error);
         res.status(500).json({
-            message: `Internal Server Error Or ${error.message}`,
-            success: false
+            success: false,
+            message: `Internal Server Error: ${error.message}`,
         });
     }
 };
+
 
 // fetch all Head Department list
 exports.fetchAllHeadDepartment = async (req, res) => {
@@ -296,12 +310,28 @@ exports.addEmployee = async (req, res) => {
         await emp.save();
 
         // Save in userCollections
-        await User.create({
+        const newUser = await User.create({
             userName: empName,
             email: empEmail,
             password: empMobile,
             employeeId: emp._id,
         });
+
+        const user = await User.findById(userId);
+
+        // also find in department
+        const dept = await Depertment.findOne({ DepartmentName: user.role });
+
+        if (!dept) {
+            return res.status(200).json({
+                success: false,
+                message: "deptarment Not Found"
+            })
+        }
+
+        // 📌 Step 4: Add employee (userId) to department people list
+        dept.people.push(newUser._id);
+        await dept.save();
 
 
         return res.status(200).json({
@@ -362,3 +392,28 @@ exports.fetchAllEmployee = async (req, res) => {
         })
     }
 }
+
+
+// Assign work to Employee
+exports.AssignWorkToEmployee = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+
+        if (!userId) {
+            return res.status(200).json({
+                success: false,
+                message: "Please Provide UserId",
+            })
+        }
+
+
+    } catch (error) {
+        console.log(error, error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server Error in AssignWorkToEmployee"
+        })
+    }
+}
+
+
