@@ -432,6 +432,7 @@ exports.AssignWorkToEmployee = async (req, res) => {
             workTitel,
             workDescription,
             workAssignToId: empId,
+            whoAssignWorkId: userId,
         });
 
         // 📌 Step 2: Push assigned work ID into employee model
@@ -453,5 +454,40 @@ exports.AssignWorkToEmployee = async (req, res) => {
     }
 };
 
+// department Head Show Assign work Employee List
+exports.epartment_Head_Show_Assign_work_Employee = async (req, res) => {
+    try {
+        const userId = req.user.userId;
 
+        if (!userId) {
+            return res.status(200).json({
+                success: false,
+                message: "Please Provide UserId",
+            });
+        }
+
+        // fetch AssignWork document list
+        const assignWorkList = await AssignWork.find({ whoAssignWorkId: userId });
+
+        if (assignWorkList.length === 0) {
+            return res.status(200).json({
+                success: false,
+                message: "No Data Found",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Fetched SuccessFully",
+            assignWorkList,
+        })
+
+    } catch (error) {
+        console.log("epartment_Head_Show_Assign_work_Employee Error:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server Error in epartment_Head_Show_Assign_work_Employee",
+        });
+    }
+}
 

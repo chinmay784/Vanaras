@@ -10,6 +10,14 @@ const AssignWorkSchema = new mongoose.Schema(
         workAssignToId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "Employee",
+        },
+        whoAssignWorkId: {
+            type: mongoose.Schema.Types.ObjectId,
+            ref: "HeadAnDepartment",
+        },
+        status: {
+            type: Boolean,
+            default: false,
         }
     },
     { timestamps: true }
