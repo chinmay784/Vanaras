@@ -467,7 +467,8 @@ exports.epartment_Head_Show_Assign_work_Employee = async (req, res) => {
         }
 
         // fetch AssignWork document list
-        const assignWorkList = await AssignWork.find({ whoAssignWorkId: userId });
+        const assignWorkList = await AssignWork.find({ whoAssignWorkId: userId })
+            .populate("workAssignToId", "empName empEmail empMobile");
 
         if (assignWorkList.length === 0) {
             return res.status(200).json({
