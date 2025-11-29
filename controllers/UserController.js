@@ -401,7 +401,6 @@ exports.fetchAllEmployee = async (req, res) => {
 exports.AssignWorkToEmployee = async (req, res) => {
     try {
         const userId = req.user.userId;
-
         if (!userId) {
             return res.status(200).json({
                 success: false,
@@ -411,48 +410,43 @@ exports.AssignWorkToEmployee = async (req, res) => {
 
         const { workTitel, workDescription, empId } = req.body;
 
-        if (!workTitel || !workDescription || !empId) {
+        if (!workDescription || !workTitel || !empId) {
             return res.status(200).json({
                 success: false,
-                message: "Please Provide workTitel, workDescription, empId",
+                message: "Please Provide workDescription or workTitel or empId",
             });
         }
 
-        // 🔍 Check employee exist
-        const employee = await Employee.findById(empId);
-        if (!employee) {
-            return res.status(200).json({
-                success: false,
-                message: "Employee Not Found",
-            });
-        }
-
-        // 📌 Step 1: Create work assign entry
+        // Create assign work
         const workAssign = await AssignWork.create({
             workTitel,
             workDescription,
             workAssignToId: empId,
-            whoAssignWorkId: userId,
+            whoAssignWorkId: userId, // IMPORTANT FIX
         });
 
-        // 📌 Step 2: Push assigned work ID into employee model
-        employee.assignWork.push(workAssign._id);
-        await employee.save();
+        // Push into employee.assignWork
+        await Employee.findByIdAndUpdate(
+            empId,
+            { $push: { assignWork: workAssign._id } },
+            { new: true }
+        );
 
         return res.status(200).json({
             success: true,
             message: "Work Assigned Successfully",
-            data: workAssign
+            workAssign,
         });
 
     } catch (error) {
-        console.log("AssignWorkToEmployee Error:", error.message);
+        console.log(error);
         return res.status(500).json({
             success: false,
             message: "Server Error in AssignWorkToEmployee",
         });
     }
 };
+
 
 // department Head Show Assign work Employee List
 exports.epartment_Head_Show_Assign_work_Employee = async (req, res) => {
@@ -492,3 +486,51 @@ exports.epartment_Head_Show_Assign_work_Employee = async (req, res) => {
     }
 }
 
+
+
+// Login Employee Fetch Work List
+exports.FetchLoginEmployeeWorkList = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+
+        if (!userId) {
+            return res.status(200).json({
+                success: false,
+                message: "Please Provide UserId",
+            });
+        }
+
+        const user = await User.findById(userId);
+
+        // also find in employee collections 
+        const emp = await Employee.findById(user.employeeId)
+            .populate({
+                path: "assignWork",
+                model: "AssignWork",
+                populate: {
+                    path: "whoAssignWorkId",
+                    select: "DepartmentHeadName DepartmentName email mobile"
+                }
+            });
+
+        if (!emp) {
+            return res.status(200).json({
+                success: false,
+                message: "emp not Found"
+            })
+        };
+
+        return res.status(200).json({
+            success: true,
+            message: "Fetched SuccessFully",
+            emp,
+        })
+
+    } catch (error) {
+        console.log(error, error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server Error in FetchLoginEmployeeWorkList"
+        })
+    }
+}
