@@ -4,7 +4,8 @@ const Depertment = require("../models/DepertmentModel");
 const HeadAnDepartment = require("../models/HeadAnDepartment");
 const Employee = require("../models/EmployeeModel");
 const AssignWork = require("../models/AssignWorkModel");
-const Product = require("../models/ProductModel")
+const Product = require("../models/ProductModel");
+const AddBarcodeIMEINo = require("../models/AddBarcodeIMEINoModel")
 
 exports.createSuperAdmin = async (req, res) => {
     try {
@@ -616,6 +617,98 @@ exports.fetchProduct = async (req, res) => {
         return res.status(500).json({
             success: false,
             message: "Server Error in createProduct"
+        })
+    }
+}
+
+
+// add Barcode or Scan Barcode
+exports.addBarCode = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+
+        if (!userId) {
+            return res.status(200).json({
+                success: false,
+                message: 'Please Provide UserId'
+            })
+        }
+
+
+        const { batchNo, lotNo, imeiNo } = req.body;
+
+        if (!batchNo || !lotNo || !imeiNo) {
+            return res.status(200).json({
+                success: false,
+                message: 'Please Provide batchNo, lotNo, imeiNo'
+            })
+        }
+
+        // prevent duplicate imeiNo
+        const existingEntry = await AddBarcodeIMEINo.findOne({ imeiNo });
+        if (existingEntry) {
+            return res.status(200).json({
+                success: false,
+                message: "This IMEI No is already added"
+            });
+        }
+
+
+        // create addBarcodeIMEINo
+        const addBarCode = await AddBarcodeIMEINo.create({
+            createdId: userId,
+            batchNo,
+            lotNo,
+            imeiNo
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "addBarCode SuccessFully",
+        })
+
+
+    } catch (error) {
+        console.log(error, error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server Error in addBarCode"
+        })
+    }
+}
+
+
+exports.fetchAllBarCodeIMEINo = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+
+        if (!userId) {
+            return res.status(200).json({
+                success: false,
+                message: 'Please Provide UserId'
+            })
+        }
+        // fetch all BarCode IMEI No
+        const allBarCodeIMEINo = await AddBarcodeIMEINo.find({});
+        if (allBarCodeIMEINo.length === 0) {
+
+            return res.status(200).json({
+                success: false,
+                message: 'No Data Found'
+            })
+        }
+        return res.status(200).json({
+            success: true,
+            message: "Fetched SuccessFully",
+            allBarCodeIMEINo
+        })
+
+
+    } catch (error) {
+        console.log(error, error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server Error in fetchAllBarCodeIMEINo"
         })
     }
 }
