@@ -712,3 +712,52 @@ exports.fetchAllBarCodeIMEINo = async (req, res) => {
         })
     }
 }
+
+// verify another user
+exports.veriFyImeiNoAgain = async (req,res) =>{
+    try {
+        const userId = req.user.userId;
+
+        if (!userId) {
+            return res.status(200).json({
+                success: false,
+                message: 'Please Provide UserId'
+            })
+        }
+
+        const { imeiNo } = req.body;
+        if (!imeiNo) {
+            return res.status(200).json({
+                success: false,
+                message: 'Please Provide imeiNo'
+            })
+
+        }
+
+        // verify imeiNo
+        const imeiNoExists = await AddBarcodeIMEINo.findOne({ imeiNo });
+        if (!imeiNoExists) {
+            return res.status(200).json({
+                success: false,
+                message: "IMEI No not found"
+            });
+        }
+
+        // i want to update status_ONE to true when verified
+        imeiNoExists.status_ONE = true;
+        await imeiNoExists.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "IMEI No verified successfully",
+        })
+
+
+    } catch (error) {
+        console.log(error, error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server Error in veriFyImeiNoAgain"
+        })
+    }
+}

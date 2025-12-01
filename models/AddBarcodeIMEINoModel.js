@@ -17,9 +17,10 @@ const AddBarcodeIMEINoModel = new mongoose.Schema({
         type: String,
         trim: true,
     },
-    status: {
+    status_ONE: {
         type: Boolean,
         default: false,
-    }
+    },
+
 }, { timestamps: true });
 module.exports = mongoose.model("AddBarcodeIMEINo", AddBarcodeIMEINoModel);

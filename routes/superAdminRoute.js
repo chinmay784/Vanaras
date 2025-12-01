@@ -1,5 +1,5 @@
 const express = require("express");
-const { createSuperAdmin, login, createDepartment, fetchAllDepartment, createHeadADepartment, fetchAllHeadDepartment, addEmployee, fetchAllEmployee, AssignWorkToEmployee, epartment_Head_Show_Assign_work_Employee, FetchLoginEmployeeWorkList, createProduct, fetchProduct, addBarCode, fetchAllBarCodeIMEINo } = require("../controllers/UserController");
+const { createSuperAdmin, login, createDepartment, fetchAllDepartment, createHeadADepartment, fetchAllHeadDepartment, addEmployee, fetchAllEmployee, AssignWorkToEmployee, epartment_Head_Show_Assign_work_Employee, FetchLoginEmployeeWorkList, createProduct, fetchProduct, addBarCode, fetchAllBarCodeIMEINo, veriFyImeiNoAgain } = require("../controllers/UserController");
 const { authMiddelWere } = require("../middelWare/authMiddelWere");
 const router = express.Router()
 
@@ -19,5 +19,6 @@ router.get("/fetchProduct",authMiddelWere,fetchProduct);
 
 router.post("/addBarCode",authMiddelWere,addBarCode);
 router.get("/fetchAllBarCodeIMEINo",authMiddelWere,fetchAllBarCodeIMEINo);
+router.post("/veriFyImeiNoAgain",authMiddelWere,veriFyImeiNoAgain)
 
 module.exports = router;
