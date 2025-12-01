@@ -6,6 +6,7 @@ const Employee = require("../models/EmployeeModel");
 const AssignWork = require("../models/AssignWorkModel");
 const Product = require("../models/ProductModel");
 const AddBarcodeIMEINo = require("../models/AddBarcodeIMEINoModel")
+const SolderingModel = require("../models/SolderingModel")
 
 exports.createSuperAdmin = async (req, res) => {
     try {
