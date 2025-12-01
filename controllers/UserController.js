@@ -804,8 +804,15 @@ exports.addSolderingDetails = async (req, res) => {
             tx,
             rx,
             gnd17,
-            status:true,
         })
+
+        // also update in AddBarcodeIMEINoModel solderingStatus to true
+        const imeiEntry = await AddBarcodeIMEINo.findById(barcodeImeiId);
+        if (imeiEntry) {
+            imeiEntry.solderingStatus = true;
+            await imeiEntry.save();
+        }
+
 
         return res.status(200).json({
             success: true,
@@ -823,40 +830,8 @@ exports.addSolderingDetails = async (req, res) => {
     }
 };
 
-// pass for soldering 
-exports.updatesolderingstatus = async (req, res) =>{
-    try {
-        const userId = req.user.userId;
-
-        if (!userId) {
-            return res.status(200).json({
-                success: false,
-                message: 'Please Provide UserId'
-            })
-        }
 
 
-        const { solderingId } = req.body;
-        if (!solderingId) {
-            return res.status(200).json({
-                success: false,
-                message: 'Please Provide solderingId'
-            })
-        }
-
-        // update soldering status to true
-
-
-    } catch (error) {
-        console.log(error,error.message);
-        return res.status(500).json({
-            success:false,
-            message:"Server Error in updatesolderingstatus"
-        })
-    }
-}
-
-// fetch all Soldering Details
 
 // exports.fetchAllIMEIANDSOLDEIRINGDETAILS = async (req, res) => {
 //     try {
