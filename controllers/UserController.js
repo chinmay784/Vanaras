@@ -776,17 +776,28 @@ exports.addSolderingDetails = async (req, res) => {
             })
         }
 
-        const { barcodeImeiId, plus12v, gnd2, ignition, din1, din2, scs, led, sos4v, an1, an2, din3, op2, gnd13, op1, tx, rx, gnd17 } = req.body;
+        const { barcodeImeiNo, plus12v, gnd2, ignition, din1, din2, scs, led, sos4v, an1, an2, din3, op2, gnd13, op1, tx, rx, gnd17 } = req.body;
 
-        if (!barcodeImeiId || !plus12v || !gnd2 || !ignition || !din1 || !din2 || !scs || !led || !sos4v || !an1 || !an2 || !din3 || !op2 || !gnd13 || !op1 || !tx || !rx || !gnd17) {
+        if (!barcodeImeiNo || !plus12v || !gnd2 || !ignition || !din1 || !din2 || !scs || !led || !sos4v || !an1 || !an2 || !din3 || !op2 || !gnd13 || !op1 || !tx || !rx || !gnd17) {
             return res.status(200).json({
                 success: false,
                 message: 'Please Provide All Fields'
             })
         }
+
+        // prevent duplicate soldering details for the same barcodeImeiNo
+        const existingSoldering = await SolderingModel.findOne({ barcodeImeiNo });
+        if (existingSoldering) {
+            return res.status(200).json({
+                success: false,
+                message: "Soldering details for this Barcode/IMEI No are already added"
+            });
+        }
+
+
         // create Soldering details
         const solderingDetails = await SolderingModel.create({
-            barcodeImeiId,
+            barcodeImeiNo,
             plus12v,
             gnd2,
             ignition,
@@ -822,6 +833,54 @@ exports.addSolderingDetails = async (req, res) => {
         })
     }
 };
+
+// pass for soldering 
+exports.updatesolderingstatus = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+
+        if (!userId) {
+            return res.status(200).json({
+                success: false,
+                message: 'Please Provide UserId'
+            });
+        }
+
+        const { barcodeImeiNo } = req.body;
+
+        if (!barcodeImeiNo) {
+            return res.status(200).json({
+                success: false,
+                message: "Please Provide barcodeImeiNo"
+            });
+        }
+
+        // 🔄 Always convert single → array
+        const imeiList = Array.isArray(barcodeImeiNo)
+            ? barcodeImeiNo
+            : [barcodeImeiNo];
+
+        // ✔ Fetch IMEI where status = true
+        const data = await AddBarcodeIMEINo.find({
+            barcodeImeiNo: { $in: imeiList },
+            status: true
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Fetched IMEI with solderingStatus = true",
+            data
+        });
+
+    } catch (error) {
+        console.log(error, error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server Error in updatesolderingstatus"
+        });
+    }
+};
+
 
 // fetch all Soldering Details
 
