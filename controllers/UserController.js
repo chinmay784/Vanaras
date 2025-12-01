@@ -803,7 +803,8 @@ exports.addSolderingDetails = async (req, res) => {
             op1,
             tx,
             rx,
-            gnd17
+            gnd17,
+            status:true,
         })
 
         return res.status(200).json({

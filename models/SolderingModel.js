@@ -22,6 +22,10 @@ const SolderingModel = new mongoose.Schema({
     tx: { type: String, trim: true },
     rx: { type: String, trim: true },
     gnd17: { type: String, trim: true },
+    status: {
+        type: Boolean,
+        default: false,
+    },
     status_Soldering: {
         type: Boolean,
         default: false,
