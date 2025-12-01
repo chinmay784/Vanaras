@@ -1,10 +1,9 @@
 const mongoose = require('mongoose');
-const { type } = require('os');
 
 const SolderingModel = new mongoose.Schema({
-    barcodeImeiNo: {
-        type: String,
-        trim: true,
+    barcodeImeiId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "AddBarcodeIMEINo",
     },
     plus12v: { type: String, trim: true },
     gnd2: { type: String, trim: true },
