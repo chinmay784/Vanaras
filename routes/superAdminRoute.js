@@ -1,5 +1,5 @@
 const express = require("express");
-const { createSuperAdmin, login, createDepartment, fetchAllDepartment, createHeadADepartment, fetchAllHeadDepartment, addEmployee, fetchAllEmployee, AssignWorkToEmployee, epartment_Head_Show_Assign_work_Employee, FetchLoginEmployeeWorkList, createProduct, fetchProduct, addBarCode, fetchAllBarCodeIMEINo, veriFyImeiNoAgain, addSolderingDetails, updatesolderingstatus } = require("../controllers/UserController");
+const { createSuperAdmin, login, createDepartment, fetchAllDepartment, createHeadADepartment, fetchAllHeadDepartment, addEmployee, fetchAllEmployee, AssignWorkToEmployee, epartment_Head_Show_Assign_work_Employee, FetchLoginEmployeeWorkList, createProduct, fetchProduct, addBarCode, fetchAllBarCodeIMEINo, veriFyImeiNoAgain, addSolderingDetails } = require("../controllers/UserController");
 const { authMiddelWere } = require("../middelWare/authMiddelWere");
 const router = express.Router()
 
@@ -21,6 +21,5 @@ router.post("/addBarCode",authMiddelWere,addBarCode);
 router.get("/fetchAllBarCodeIMEINo",authMiddelWere,fetchAllBarCodeIMEINo);
 router.post("/veriFyImeiNoAgain",authMiddelWere,veriFyImeiNoAgain);
 router.post("/addSolderingDetails",authMiddelWere,addSolderingDetails);
-router.post("/updatesolderingstatus",authMiddelWere,updatesolderingstatus)
 
 module.exports = router;
