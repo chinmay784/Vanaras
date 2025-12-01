@@ -714,7 +714,7 @@ exports.fetchAllBarCodeIMEINo = async (req, res) => {
 }
 
 // verify another user
-exports.veriFyImeiNoAgain = async (req,res) =>{
+exports.veriFyImeiNoAgain = async (req, res) => {
     try {
         const userId = req.user.userId;
 
@@ -761,3 +761,88 @@ exports.veriFyImeiNoAgain = async (req,res) =>{
         })
     }
 }
+
+
+// add Soldering controller logic
+exports.addSolderingDetails = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+
+        if (!userId) {
+            return res.status(200).json({
+                success: false,
+                message: 'Please Provide UserId'
+            })
+        }
+
+        const { barcodeImeiId, plus12v, gnd2, ignition, din1, din2, scs, led, sos4v, an1, an2, din3, op2, gnd13, op1, tx, rx, gnd17 } = req.body;
+
+        if (!barcodeImeiId || !plus12v || !gnd2 || !ignition || !din1 || !din2 || !scs || !led || !sos4v || !an1 || !an2 || !din3 || !op2 || !gnd13 || !op1 || !tx || !rx || !gnd17) {
+            return res.status(200).json({
+                success: false,
+                message: 'Please Provide All Fields'
+            })
+        }
+        // create Soldering details
+        const solderingDetails = await SolderingModel.create({
+            barcodeImeiId,
+            plus12v,
+            gnd2,
+            ignition,
+            din1,
+            din2,
+            scs,
+            led,
+            sos4v,
+            an1,
+            an2,
+            din3,
+            op2,
+            gnd13,
+            op1,
+            tx,
+            rx,
+            gnd17
+        })
+
+        return res.status(200).json({
+            success: true,
+            message: 'Soldering Details Added SuccessFully',
+            solderingDetails
+        })
+
+
+    } catch (error) {
+        console.log(error, error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server Error in addSolderingDetails"
+        })
+    }
+};
+
+// fetch all Soldering Details
+
+// exports.fetchAllIMEIANDSOLDEIRINGDETAILS = async (req, res) => {
+//     try {
+//         const userId = req.user.userId;
+//         if (!userId) {
+//             return res.status(200).json({
+//                 success: false,
+//                 message: 'Please Provide UserId'
+//             })
+//         }
+
+//         // fetch all Soldering Details with IMEI No
+//         const allDetails = await SolderingModel.find({})
+//             .populate({})
+
+
+//     } catch (error) {
+//         console.log(error, error.message);
+//         return res.status(500).json({
+//             success: false,
+//             message: "Server Error in fetchAllIMEIANDSOLDEIRINGDETAILS"
+//         })
+//     }
+// }

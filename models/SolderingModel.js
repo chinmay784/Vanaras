@@ -5,7 +5,6 @@ const SolderingModel = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "AddBarcodeIMEINo",
     },
-
     plus12v: { type: String, trim: true },
     gnd2: { type: String, trim: true },
     ignition: { type: String, trim: true },
@@ -23,6 +22,10 @@ const SolderingModel = new mongoose.Schema({
     tx: { type: String, trim: true },
     rx: { type: String, trim: true },
     gnd17: { type: String, trim: true },
+    status_Soldering: {
+        type: Boolean,
+        default: false,
+    },
 }, { timestamps: true });
 
 module.exports = mongoose.model("SolderingModel", SolderingModel);
