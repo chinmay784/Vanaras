@@ -911,7 +911,7 @@ exports.verifySolderingDetails = async (req, res) => {
         // 🔍 Find fields that are NOT "true" or true
         const notTrueFields = Object.entries(detailsObject)
             .filter(([key]) =>
-                !["_id", "barcodeImeiId", "createdAt", "updatedAt", "__v", "status_Soldering"].includes(key)
+                !["_id", "barcodeImeiId", "createdAt", "updatedAt", "__v", "status_Soldering, batteryConnectionStatus"].includes(key)
             )
             .filter(([key, value]) => !(value === true || value === "true"))
             .map(([key, value]) => ({ field: key, value }));
