@@ -963,7 +963,7 @@ exports.addBatteryConnectionDetails = async (req, res) => {
         }
 
         const { imeiNo, batteryType, voltage, batteryConnectedStatus, capacitorConnectedStatus } = req.body;
-        if (!barcodeImeiId || !batteryType || !voltage) {
+        if (!imeiNo || !batteryType || !voltage) {
             return res.status(200).json({
                 success: false,
                 message: 'Please Provide imeiNo, batteryType, voltage batteryConnectedStatus capacitorConnectedStatus'
