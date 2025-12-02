@@ -26,6 +26,10 @@ const SolderingModel = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
+    batteryConnectionStatus: {
+        type: Boolean,
+        default: false,
+    },
 }, { timestamps: true });
 
 module.exports = mongoose.model("SolderingModel", SolderingModel);

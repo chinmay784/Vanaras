@@ -5,8 +5,9 @@ const HeadAnDepartment = require("../models/HeadAnDepartment");
 const Employee = require("../models/EmployeeModel");
 const AssignWork = require("../models/AssignWorkModel");
 const Product = require("../models/ProductModel");
-const AddBarcodeIMEINo = require("../models/AddBarcodeIMEINoModel")
-const SolderingModel = require("../models/SolderingModel")
+const AddBarcodeIMEINo = require("../models/AddBarcodeIMEINoModel");
+const SolderingModel = require("../models/SolderingModel");
+const BatteryConnectionModel = require("../models/BatteryConnectionModel")
 
 exports.createSuperAdmin = async (req, res) => {
     try {
@@ -941,3 +942,82 @@ exports.verifySolderingDetails = async (req, res) => {
     }
 };
 
+
+exports.addBatteryConnectionDetails = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+
+        if (!userId) {
+            return res.status(200).json({
+                success: false,
+                message: 'Please Provide UserId'
+            })
+        }
+
+        const { imeiNo, batteryType, voltage, batteryConnectedStatus, capacitorConnectedStatus } = req.body;
+        if (!barcodeImeiId || !batteryType || !voltage) {
+            return res.status(200).json({
+                success: false,
+                message: 'Please Provide imeiNo, batteryType, voltage batteryConnectedStatus capacitorConnectedStatus'
+            })
+        }
+
+
+        //prevent duplicate entry
+        const existingEntry = await BatteryConnectionModel.findOne({ imeiNo });
+        if (existingEntry) {
+            return res.status(200).json({
+                success: false,
+                message: "Battery connection details for this IMEI No are already added"
+            });
+        }
+
+        // create BatteryConnection details
+        const batteryConnectionDetails = await BatteryConnectionModel.create({
+            imeiNo,
+            batteryType,
+            voltage,
+            batteryConnectedStatus,
+            capacitorConnectedStatus
+        })
+
+
+
+        // Here some work will be done now
+        // first call api in addBarCodeImeiNoModel
+        const imei = await AddBarcodeIMEINo.findOne({ imeiNo });
+
+        if (!imei) {
+            return res.status(200).json({
+                success: false,
+                message: "IMEI No not found in AddBarcodeIMEINoModel"
+            });
+        }
+
+        // Then db call for in soldering Model
+        const solderingEntry = await SolderingModel.findOne({ barcodeImeiId: imei._id });
+        if (!solderingEntry) {
+            return res.status(200).json({
+                success: false,
+                message: "Soldering details not found for this IMEI No"
+            });
+        }
+
+        // Here we can update status for batteryConnectionStatus in soldering model
+        solderingEntry.batteryConnectionStatus = true;
+        await solderingEntry.save();
+
+        return res.status(200).json({
+            success: true,
+            message: 'Battery Connection Details Added SuccessFully',
+            batteryConnectionDetails
+        })
+
+    } catch (error) {
+        console.log(error, error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server Error in addBatteryConnectionDetails"
+        })
+    }
+};
