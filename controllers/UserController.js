@@ -831,28 +831,37 @@ exports.addSolderingDetails = async (req, res) => {
 };
 
 
+exports.fetchSolderingDetailsandImeiNo = async (req, res) => {
+    try {
+        const userId = req.user.userId;
 
+        if (!userId) {
+            return res.status(200).json({
+                success: false,
+                message: 'Please Provide UserId'
+            })
+        }
 
-// exports.fetchAllIMEIANDSOLDEIRINGDETAILS = async (req, res) => {
-//     try {
-//         const userId = req.user.userId;
-//         if (!userId) {
-//             return res.status(200).json({
-//                 success: false,
-//                 message: 'Please Provide UserId'
-//             })
-//         }
+        // fetch all Soldering details with imeiNo
+        const solderingDetailsList = await SolderingModel.find({})
+            .populate("barcodeImeiId", "imeiNo batchNo lotNo");
+        if (solderingDetailsList.length === 0) {
+            return res.status(200).json({
+                success: false,
+                message: 'No Data Found'
+            })
+        }
+        return res.status(200).json({
+            success: true,
+            message: "Fetched SuccessFully",
+            solderingDetailsList
+        })
 
-//         // fetch all Soldering Details with IMEI No
-//         const allDetails = await SolderingModel.find({})
-//             .populate({})
-
-
-//     } catch (error) {
-//         console.log(error, error.message);
-//         return res.status(500).json({
-//             success: false,
-//             message: "Server Error in fetchAllIMEIANDSOLDEIRINGDETAILS"
-//         })
-//     }
-// }
+    } catch (error) {
+        console.log(error, error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server Error in fetchSolderingDetailsandImeiNo"
+        })
+    }
+}
