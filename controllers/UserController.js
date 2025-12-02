@@ -1095,6 +1095,14 @@ exports.createFirmWare = async (req, res) => {
             slNo
         })
 
+        // also find in BatteryConnectionModel and update overAllassemblyStatus to true
+        const batteryEntry = await BatteryConnectionModel.findOne({ imeiNo });
+        if (batteryEntry) {
+            batteryEntry.overAllassemblyStatus = true;
+            await batteryEntry.save();
+        }
+
+
         return res.status(200).json({
             success: true,
             message: 'FirmWare Details Added SuccessFully',
