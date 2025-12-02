@@ -865,3 +865,79 @@ exports.fetchSolderingDetailsandImeiNo = async (req, res) => {
         })
     }
 }
+
+
+exports.verifySolderingDetails = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+
+        if (!userId) {
+            return res.status(200).json({
+                success: false,
+                message: 'Please Provide UserId'
+            });
+        }
+
+        const { imeiNo } = req.body;
+        if (!imeiNo) {
+            return res.status(200).json({
+                success: false,
+                message: 'Please Provide imeiNo'
+            });
+        }
+
+        const imeiEntry = await AddBarcodeIMEINo.findOne({ imeiNo });
+
+        if (!imeiEntry) {
+            return res.status(200).json({
+                success: false,
+                message: "IMEI No not found"
+            });
+        }
+
+        const solderingDetails = await SolderingModel.findOne({ barcodeImeiId: imeiEntry._id });
+
+        if (!solderingDetails) {
+            return res.status(200).json({
+                success: false,
+                message: "Soldering details not found for this IMEI No"
+            });
+        }
+
+        // Convert to plain object
+        const detailsObject = solderingDetails.toObject();
+
+        // 🔍 Find fields that are NOT "true" or true
+        const notTrueFields = Object.entries(detailsObject)
+            .filter(([key]) =>
+                !["_id", "barcodeImeiId", "createdAt", "updatedAt", "__v", "status_Soldering"].includes(key)
+            )
+            .filter(([key, value]) => !(value === true || value === "true"))
+            .map(([key, value]) => ({ field: key, value }));
+
+        if (notTrueFields.length > 0) {
+            return res.status(200).json({
+                success: false,
+                message: "Soldering verification failed: Some fields are not true",
+                failedFields: notTrueFields
+            });
+        }
+
+        // ⭐ Update status_Soldering to true
+        solderingDetails.status_Soldering = true;
+        await solderingDetails.save();
+
+        return res.status(200).json({
+            success: true,
+            message: "Soldering verification successful: All fields are true",
+        });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            message: "Server Error in verifySolderingDetails"
+        });
+    }
+};
+
