@@ -7,7 +7,9 @@ const AssignWork = require("../models/AssignWorkModel");
 const Product = require("../models/ProductModel");
 const AddBarcodeIMEINo = require("../models/AddBarcodeIMEINoModel");
 const SolderingModel = require("../models/SolderingModel");
-const BatteryConnectionModel = require("../models/BatteryConnectionModel")
+const BatteryConnectionModel = require("../models/BatteryConnectionModel");
+const FirmWareModel = require("../models/FirmWareModel");
+
 
 exports.createSuperAdmin = async (req, res) => {
     try {
@@ -1055,13 +1057,56 @@ exports.fetchBatteryConnectionDetails = async (req, res) => {
             message: "Fetched SuccessFully",
             batteryConnectionDetailsList
         })
-        
+
 
     } catch (error) {
         console.log(error, error.message);
         return res.status(500).json({
             success: false,
             message: "Server Error in fetchBatteryConnectionDetails"
+        })
+    }
+}
+
+
+exports.createFirmWare = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        if (!userId) {
+            return res.status(200).json({
+                success: false,
+                message: 'Please Provide UserId'
+            })
+        }
+
+
+        const { imeiNo, iccidNo, slNo } = req.body;
+        if (!imeiNo || !iccidNo || !slNo) {
+            return res.status(200).json({
+                success: false,
+                message: 'Please Provide imeiNo, iccidNo, slNo'
+            })
+        }
+
+        // create FirmWare details
+        const firmWareDetails = await FirmWareModel.create({
+            imeiNo,
+            iccidNo,
+            slNo
+        })
+
+        return res.status(200).json({
+            success: true,
+            message: 'FirmWare Details Added SuccessFully',
+            firmWareDetails
+        })
+
+
+    } catch (error) {
+        console.log(error, error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server Error in createFirmWare"
         })
     }
 }
