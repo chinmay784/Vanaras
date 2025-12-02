@@ -905,14 +905,21 @@ exports.verifySolderingDetails = async (req, res) => {
             });
         }
 
-        // Convert to plain object
         const detailsObject = solderingDetails.toObject();
 
-        // 🔍 Find fields that are NOT "true" or true
+        // EXCLUDED FIELDS CORRECTED ✔️
+        const excludedFields = [
+            "_id",
+            "barcodeImeiId",
+            "createdAt",
+            "updatedAt",
+            "__v",
+            "status_Soldering",
+            "batteryConnectionStatus"
+        ];
+
         const notTrueFields = Object.entries(detailsObject)
-            .filter(([key]) =>
-                !["_id", "barcodeImeiId", "createdAt", "updatedAt", "__v", "status_Soldering, batteryConnectionStatus"].includes(key)
-            )
+            .filter(([key]) => !excludedFields.includes(key))
             .filter(([key, value]) => !(value === true || value === "true"))
             .map(([key, value]) => ({ field: key, value }));
 
@@ -924,13 +931,13 @@ exports.verifySolderingDetails = async (req, res) => {
             });
         }
 
-        // ⭐ Update status_Soldering to true
+        // ⭐ All good → mark status true
         solderingDetails.status_Soldering = true;
         await solderingDetails.save();
 
         return res.status(200).json({
             success: true,
-            message: "Soldering verification successful: All fields are true",
+            message: "Soldering verification successful: All fields are true"
         });
 
     } catch (error) {
@@ -941,6 +948,7 @@ exports.verifySolderingDetails = async (req, res) => {
         });
     }
 };
+
 
 
 exports.addBatteryConnectionDetails = async (req, res) => {
