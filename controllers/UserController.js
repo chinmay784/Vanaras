@@ -1029,3 +1029,39 @@ exports.addBatteryConnectionDetails = async (req, res) => {
         })
     }
 };
+
+
+exports.fetchBatteryConnectionDetails = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+        if (!userId) {
+            return res.status(200).json({
+                success: false,
+                message: 'Please Provide UserId'
+            })
+        }
+
+        // fetch all Battery Connection details
+        const batteryConnectionDetailsList = await BatteryConnectionModel.find({});
+        if (batteryConnectionDetailsList.length === 0) {
+            return res.status(200).json({
+                success: false,
+                message: 'No Data Found'
+            })
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Fetched SuccessFully",
+            batteryConnectionDetailsList
+        })
+        
+
+    } catch (error) {
+        console.log(error, error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server Error in fetchBatteryConnectionDetails"
+        })
+    }
+}
