@@ -1,5 +1,5 @@
 const express = require("express");
-const { createSuperAdmin, login, createDepartment, fetchAllDepartment, createHeadADepartment, fetchAllHeadDepartment, addEmployee, fetchAllEmployee, AssignWorkToEmployee, epartment_Head_Show_Assign_work_Employee, FetchLoginEmployeeWorkList, createProduct, fetchProduct, addBarCode, fetchAllBarCodeIMEINo, veriFyImeiNoAgain, addSolderingDetails, fetchSolderingDetailsandImeiNo, verifySolderingDetails, addBatteryConnectionDetails, fetchBatteryConnectionDetails, createFirmWare, fetchFirmWareDetails } = require("../controllers/UserController");
+const { createSuperAdmin, login, createDepartment, fetchAllDepartment, createHeadADepartment, fetchAllHeadDepartment, addEmployee, fetchAllEmployee, AssignWorkToEmployee, epartment_Head_Show_Assign_work_Employee, FetchLoginEmployeeWorkList, createProduct, fetchProduct, addBarCode, fetchAllBarCodeIMEINo, veriFyImeiNoAgain, addSolderingDetails, fetchSolderingDetailsandImeiNo, verifySolderingDetails, addBatteryConnectionDetails, fetchBatteryConnectionDetails, createFirmWare, fetchFirmWareDetails, QualityCheck } = require("../controllers/UserController");
 const { authMiddelWere } = require("../middelWare/authMiddelWere");
 const router = express.Router()
 
@@ -27,5 +27,6 @@ router.post("/addBatteryConnectionDetails",authMiddelWere,addBatteryConnectionDe
 router.get("/fetchBatteryConnectionDetails",authMiddelWere,fetchBatteryConnectionDetails);
 router.post("/createFirmWare",authMiddelWere,createFirmWare);
 router.get("/fetchFirmWareDetails",authMiddelWere,fetchFirmWareDetails);
+router.post("/QualityCheck",authMiddelWere,QualityCheck);
 
 module.exports = router;

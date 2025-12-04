@@ -9,6 +9,7 @@ const AddBarcodeIMEINo = require("../models/AddBarcodeIMEINoModel");
 const SolderingModel = require("../models/SolderingModel");
 const BatteryConnectionModel = require("../models/BatteryConnectionModel");
 const FirmWareModel = require("../models/FirmWareModel");
+const OcModel = require("../models/OcModel");
 
 
 exports.createSuperAdmin = async (req, res) => {
@@ -1169,3 +1170,86 @@ exports.fetchFirmWareDetails = async (req, res) => {
     }
 };
 
+
+exports.QualityCheck = async (req, res) => {
+    try {
+        const userId = req.user?.userId;
+
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: 'Please Provide UserId'
+            });
+        }
+
+        const {
+            imeiNo,
+            ocStatus,
+            probePin,
+            powerSupply,
+            capacitorBackup,
+            terminal,
+            signalIntegraty,
+            cabelStrain,
+            ledCheck,
+            gpsClod,
+            gsmNetwork,
+            productId,
+            physicallyAssembly,
+            housingSeal,
+            labelPlaceMent,
+            qrCodeRelaliablty,
+            finalVisualInspection,
+            packingMatarialIntegraty
+        } = req.body;
+
+        if (!imeiNo) {
+            return res.status(400).json({
+                success: false,
+                message: "Please Provide imeiNo"
+            });
+        }
+
+        // ✅ Find existing quality record using imeiNo
+        let qualityData = await OcModel.findOne({ imeiNo });
+
+        if (!qualityData) {
+            // ✅ CREATE NEW ENTRY IF NOT EXISTS
+            qualityData = await OcModel.create({
+                imeiNo,
+                ocStatus,
+                probePin,
+                powerSupply,
+                capacitorBackup,
+                terminal,
+                signalIntegraty,
+                cabelStrain,
+                ledCheck,
+                gpsClod,
+                gsmNetwork,
+                productId,
+                physicallyAssembly,
+                housingSeal,
+                labelPlaceMent,
+                qrCodeRelaliablty,
+                finalVisualInspection,
+                packingMatarialIntegraty
+            });
+
+            return res.status(201).json({
+                success: true,
+                message: "Quality Check Data Created Successfully",
+                data: qualityData
+            });
+        }
+
+
+
+    } catch (error) {
+        console.log("QualityCheck Error:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server Error in QualityCheck"
+        });
+    }
+};
