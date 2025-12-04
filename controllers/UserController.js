@@ -1184,7 +1184,6 @@ exports.QualityCheck = async (req, res) => {
 
         const {empName,
             imeiNo,
-            ocStatus,
             probePin,
             powerSupply,
             capacitorBackup,
