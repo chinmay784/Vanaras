@@ -1131,9 +1131,7 @@ exports.fetchFirmWareDetails = async (req, res) => {
             });
         }
 
-        // ✅ Fetch all FirmWare details
-        const firmWareDetailsList = await FirmWareModel.find({})
-            .populate("imeiNo");
+        const firmWareDetailsList = await FirmWareModel.find({});
 
         if (!firmWareDetailsList || firmWareDetailsList.length === 0) {
             return res.status(404).json({
@@ -1142,10 +1140,24 @@ exports.fetchFirmWareDetails = async (req, res) => {
             });
         }
 
+        // ✅ Attach IMEI Details manually
+        const finalData = await Promise.all(
+            firmWareDetailsList.map(async (fw) => {
+                const imeiData = await AddBarcodeIMEINo.findOne({
+                    imeiNo: fw.imeiNo
+                });
+
+                return {
+                    ...fw.toObject(),
+                    imeiDetails: imeiData || null
+                };
+            })
+        );
+
         return res.status(200).json({
             success: true,
             message: "Fetched Successfully",
-            firmWareDetailsList
+            firmWareDetailsList: finalData
         });
 
     } catch (error) {
@@ -1156,3 +1168,4 @@ exports.fetchFirmWareDetails = async (req, res) => {
         });
     }
 };
+
