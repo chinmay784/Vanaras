@@ -1182,7 +1182,7 @@ exports.QualityCheck = async (req, res) => {
             });
         }
 
-        const {
+        const {empName,
             imeiNo,
             ocStatus,
             probePin,
@@ -1216,6 +1216,7 @@ exports.QualityCheck = async (req, res) => {
         if (!qualityData) {
             // ✅ CREATE NEW ENTRY IF NOT EXISTS
             qualityData = await OcModel.create({
+                empName,
                 imeiNo,
                 ocStatus,
                 probePin,
@@ -1236,11 +1237,21 @@ exports.QualityCheck = async (req, res) => {
                 packingMatarialIntegraty
             });
 
+
+            // find in FirmWareModel and update qualityCheckStatus to true
+            const firmwareEntry = await FirmWareModel.findOne({ imeiNo });
+
+            if (firmwareEntry) {
+                firmwareEntry.firmWareStatus = true;
+                await firmwareEntry.save();
+            }
+
             return res.status(201).json({
                 success: true,
                 message: "Quality Check Data Created Successfully",
                 data: qualityData
             });
+
         }
 
 

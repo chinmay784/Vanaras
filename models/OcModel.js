@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 
 const OcModelSchema = new mongoose.Schema({
+    empName: {
+        type: String,
+        trim: true,
+    },
     imeiNo: {
         type: String,
         trim: true,
