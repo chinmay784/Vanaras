@@ -1118,3 +1118,41 @@ exports.createFirmWare = async (req, res) => {
         })
     }
 }
+
+
+exports.fetchFirmWareDetails = async (req, res) => {
+    try {
+        const userId = req.user?.userId;
+
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: 'Unauthorized: UserId missing'
+            });
+        }
+
+        // ✅ Fetch all FirmWare details
+        const firmWareDetailsList = await FirmWareModel.find({})
+            .populate("imeiNo");
+
+        if (!firmWareDetailsList || firmWareDetailsList.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'No Data Found'
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Fetched Successfully",
+            firmWareDetailsList
+        });
+
+    } catch (error) {
+        console.error("fetchFirmWareDetails Error:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server Error in fetchFirmWareDetails"
+        });
+    }
+};
