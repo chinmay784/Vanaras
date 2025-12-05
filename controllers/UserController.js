@@ -1182,7 +1182,7 @@ exports.QualityCheck = async (req, res) => {
             });
         }
 
-        const {empName,
+        const { empName,
             imeiNo,
             probePin,
             powerSupply,
@@ -1260,6 +1260,57 @@ exports.QualityCheck = async (req, res) => {
         return res.status(500).json({
             success: false,
             message: "Server Error in QualityCheck"
+        });
+    }
+};
+
+
+exports.FetchallQualityCheck = async (req, res) => {
+    try {
+        const userId = req.user?.userId;
+
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: 'Please Provide UserId'
+            });
+        }
+
+        // ✅ Fetch all QC data
+        const allQualityCheckData = await OcModel.find({});
+
+        if (!allQualityCheckData || allQualityCheckData.length === 0) {
+            return res.status(200).json({
+                success: false,
+                message: 'No Data Found'
+            });
+        }
+
+        // ✅ Also attach FirmWareModel details using imeiNo
+        const finalData = await Promise.all(
+            allQualityCheckData.map(async (qc) => {
+                const firmwareData = await FirmWareModel.findOne({
+                    imeiNo: qc.imeiNo
+                });
+
+                return {
+                    ...qc.toObject(),
+                    firmwareDetails: firmwareData || null
+                };
+            })
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "Fetched Successfully",
+            allQualityCheckData: finalData   // ✅ FIXED HERE
+        });
+
+    } catch (error) {
+        console.log("FetchallQualityCheck Error:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server Error in FetchallQualityCheck"
         });
     }
 };
