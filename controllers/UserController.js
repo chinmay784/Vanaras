@@ -1217,7 +1217,6 @@ exports.QualityCheck = async (req, res) => {
             qualityData = await OcModel.create({
                 empName,
                 imeiNo,
-                ocStatus,
                 probePin,
                 powerSupply,
                 capacitorBackup,
