@@ -1313,3 +1313,100 @@ exports.FetchallQualityCheck = async (req, res) => {
         });
     }
 };
+
+
+
+exports.getTodayFirmwareReport = async (req, res) => {
+    try {
+        const userId = req.user?.userId;
+
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: "Please Provide UserId",
+            });
+        }
+
+        // 📅 TODAY DATE
+        const today = new Date();
+
+        // ⏰ 10 AM IST → 04:30 UTC
+        const startTime = new Date(today);
+        startTime.setUTCHours(4, 30, 0, 0);
+
+        // ⏰ 6 PM IST → 12:30 UTC
+        const endTime = new Date(today);
+        endTime.setUTCHours(12, 30, 0, 0);
+
+        const report = await FirmWareModel.aggregate([
+            {
+                $match: {
+                    createdAt: {
+                        $gte: startTime,
+                        $lte: endTime,
+                    },
+                },
+            },
+            {
+                $group: {
+                    _id: {
+                        day: {
+                            $dateToString: {
+                                format: "%Y-%m-%d",
+                                date: "$createdAt",
+                                timezone: "Asia/Kolkata",
+                            },
+                        },
+                    },
+
+                    totalFirmware: { $sum: 1 },
+
+                    completed: {
+                        $sum: {
+                            $cond: [{ $eq: ["$firmWareStatus", true] }, 1, 0],
+                        },
+                    },
+
+                    pending: {
+                        $sum: {
+                            $cond: [{ $eq: ["$firmWareStatus", false] }, 1, 0],
+                        },
+                    },
+
+                    imeis: {
+                        $push: {
+                            imeiNo: "$imeiNo",
+                            iccidNo: "$iccidNo",
+                            slNo: "$slNo",
+                            firmWareStatus: "$firmWareStatus",
+                            createdAt: "$createdAt",
+                        },
+                    },
+                },
+            },
+        ]);
+
+        if (report.length === 0) {
+            return res.status(200).json({
+                success: false,
+                message: "No Firmware Work Found Today (10 AM – 6 PM IST)",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Today Firmware Report Fetched Successfully",
+            data: report,
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            message: "Server Error in getTodayFirmwareReport",
+        });
+    }
+};
+
+
+
+
