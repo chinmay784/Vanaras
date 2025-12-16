@@ -12,4 +12,4 @@ exports.connectToDatabase = async () => {
 };
 
 
-// db Traxo Company URL = mongodb+srv://admin_db_user:FB1b4dr263gLzMJg@productiongpsdevices.adxkho4.mongodb.net/ProductionGPSDevices
+// db Traxo Company URL = mongodb+srv://admin_db_user:IMVZFc9NDiGRyWGj@cluster0.kaohhih.mongodb.net/ProductionGPSDevices
