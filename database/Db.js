@@ -10,3 +10,6 @@ exports.connectToDatabase = async () => {
         process.exit(1); // Exit the process with failure
     }
 };
+
+
+// db Traxo Company URL = mongodb+srv://admin_db_user:FB1b4dr263gLzMJg@productiongpsdevices.adxkho4.mongodb.net/ProductionGPSDevices
