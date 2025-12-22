@@ -1480,7 +1480,7 @@ exports.showAllDateReports = async (req, res) => {
                 ...report.toObject(),
                 firmwareDetails: firmwareData ? {
                     slNo: firmwareData.slNo || null,
-                    iccid: firmwareData.iccid || null
+                    iccidNo: firmwareData.iccidNo || null
                 } : null
             });
         }
