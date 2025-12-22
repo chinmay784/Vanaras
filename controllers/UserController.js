@@ -1430,47 +1430,30 @@ exports.showAllDateReports = async (req, res) => {
             });
         }
 
-        // *******************************
-        // ACCEPT MULTIPLE FORMATS
-        // *******************************
         let normalizedDate;
 
-        // Case: YYYY-MM-DD (safe)
-        if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
-            normalizedDate = date;
-        }
-
-        // Case: DD-MM-YYYY
+        if (/^\d{4}-\d{2}-\d{2}$/.test(date)) normalizedDate = date;
         else if (/^\d{2}-\d{2}-\d{4}$/.test(date)) {
             const [d, m, y] = date.split("-");
             normalizedDate = `${y}-${m}-${d}`;
         }
-
-        // Case: DD/MM/YYYY
         else if (/^\d{2}\/\d{2}\/\d{4}$/.test(date)) {
             const [d, m, y] = date.split("/");
             normalizedDate = `${y}-${m}-${d}`;
         }
-
         else {
             return res.status(400).json({
                 success: false,
-                message: "Invalid date format. Allowed: YYYY-MM-DD or DD-MM-YYYY or DD/MM/YYYY",
+                message: "Invalid date format",
             });
         }
 
-        // NOW convert to DATE object
         const startDateIST = new Date(`${normalizedDate}T00:00:00+05:30`);
         const endDateIST = new Date(`${normalizedDate}T23:59:59+05:30`);
 
-
-        // Convert IST to UTC for MongoDB
         const startUTC = new Date(startDateIST.toISOString());
         const endUTC = new Date(endDateIST.toISOString());
 
-        // *******************************
-        // DATABASE FILTER
-        // *******************************
         const reports = await OcModel.find({
             createdAt: { $gte: startUTC, $lt: endUTC }
         });
@@ -1482,14 +1465,32 @@ exports.showAllDateReports = async (req, res) => {
             });
         }
 
+        // =============================
+        // ADD slNo & iccid
+        // =============================
+        const enrichedReports = [];
+
+        for (let report of reports) {
+            const firmwareData = await FirmWareModel.findOne(
+                { imeiNo: report.imeiNo },
+                { slNo: 1, iccid: 1, _id: 0 } // return only slNo & iccid
+            );
+
+            enrichedReports.push({
+                ...report.toObject(),
+                firmwareDetails: firmwareData ? {
+                    slNo: firmwareData.slNo || null,
+                    iccid: firmwareData.iccid || null
+                } : null
+            });
+        }
+
         return res.status(200).json({
             success: true,
             message: "Fetched Successfully",
-            dateRequested: date,
             normalizedDate,
-            rangeUTC: { startUTC, endUTC },
-            count:reports.length,
-            reports,
+            count: enrichedReports.length,
+            reports: enrichedReports
         });
 
     } catch (error) {
@@ -1500,3 +1501,4 @@ exports.showAllDateReports = async (req, res) => {
         });
     }
 };
+
