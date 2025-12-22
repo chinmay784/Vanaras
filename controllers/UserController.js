@@ -1488,6 +1488,7 @@ exports.showAllDateReports = async (req, res) => {
             dateRequested: date,
             normalizedDate,
             rangeUTC: { startUTC, endUTC },
+            count:reports.length,
             reports,
         });
 
