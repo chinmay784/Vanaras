@@ -1502,3 +1502,81 @@ exports.showAllDateReports = async (req, res) => {
     }
 };
 
+
+exports.fetchQCReport = async (req, res) => {
+    try {
+
+        const userId = req.user?.userId;
+
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: "Please Provide UserId",
+            });
+        }
+
+        const { date } = req.body;
+
+        if (!date) {
+            return res.status(400).json({
+                success: false,
+                message: "Please Provide date"
+            });
+        }
+
+        let start, end;
+
+        // Detect Format
+        if (date.includes('-')) {
+            const parts = date.split('-');
+
+            if (parts[0].length === 4) {
+                // YYYY-MM-DD → already correct format
+                start = new Date(date);
+                end = new Date(date);
+            } else {
+                // DD-MM-YYYY → convert to YYYY-MM-DD
+                const [dd, mm, yyyy] = parts;
+                start = new Date(`${yyyy}-${mm}-${dd}`);
+                end = new Date(`${yyyy}-${mm}-${dd}`);
+            }
+        } else {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid date format"
+            });
+        }
+
+        // full day range
+        end.setHours(23, 59, 59, 999);
+
+        const qcReport = await OcModel.find({
+            createdAt: {
+                $gte: start,
+                $lte: end,
+            }
+        });
+
+        if (qcReport.length === 0) {
+            return res.status(200).json({
+                success: false,
+                message: "No Data Found for this date"
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Fetched Successfully",
+            count: qcReport.length,
+            qcReport
+        });
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({
+            success: false,
+            message: "Server Error in fetchQCReport"
+        });
+    }
+};
+
