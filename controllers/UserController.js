@@ -1410,3 +1410,92 @@ exports.getTodayFirmwareReport = async (req, res) => {
 
 
 
+exports.showAllDateReports = async (req, res) => {
+    try {
+        const userId = req.user?.userId;
+
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: "Please Provide UserId",
+            });
+        }
+
+        let { date } = req.body;
+
+        if (!date) {
+            return res.status(400).json({
+                success: false,
+                message: "Please Provide date",
+            });
+        }
+
+        // *******************************
+        // ACCEPT MULTIPLE FORMATS
+        // *******************************
+        let normalizedDate;
+
+        // Case: YYYY-MM-DD (safe)
+        if (/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+            normalizedDate = date;
+        }
+
+        // Case: DD-MM-YYYY
+        else if (/^\d{2}-\d{2}-\d{4}$/.test(date)) {
+            const [d, m, y] = date.split("-");
+            normalizedDate = `${y}-${m}-${d}`;
+        }
+
+        // Case: DD/MM/YYYY
+        else if (/^\d{2}\/\d{2}\/\d{4}$/.test(date)) {
+            const [d, m, y] = date.split("/");
+            normalizedDate = `${y}-${m}-${d}`;
+        }
+
+        else {
+            return res.status(400).json({
+                success: false,
+                message: "Invalid date format. Allowed: YYYY-MM-DD or DD-MM-YYYY or DD/MM/YYYY",
+            });
+        }
+
+        // NOW convert to DATE object
+        const startDateIST = new Date(`${normalizedDate}T00:00:00+05:30`);
+        const endDateIST = new Date(`${normalizedDate}T23:59:59+05:30`);
+
+
+        // Convert IST to UTC for MongoDB
+        const startUTC = new Date(startDateIST.toISOString());
+        const endUTC = new Date(endDateIST.toISOString());
+
+        // *******************************
+        // DATABASE FILTER
+        // *******************************
+        const reports = await OcModel.find({
+            createdAt: { $gte: startUTC, $lt: endUTC }
+        });
+
+        if (reports.length === 0) {
+            return res.status(200).json({
+                success: false,
+                message: "No Data Found for this date",
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "Fetched Successfully",
+            dateRequested: date,
+            normalizedDate,
+            rangeUTC: { startUTC, endUTC },
+            reports,
+        });
+
+    } catch (error) {
+        console.log("❌ Error:", error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server Error in showAllDateReports",
+        });
+    }
+};
