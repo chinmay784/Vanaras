@@ -1473,7 +1473,7 @@ exports.showAllDateReports = async (req, res) => {
         for (let report of reports) {
             const firmwareData = await FirmWareModel.findOne(
                 { imeiNo: report.imeiNo },
-                { slNo: 1, iccid: 1, _id: 0 } // return only slNo & iccid
+                { slNo: 1, iccidNo: 1, _id: 0 } // return only slNo & iccid
             );
 
             enrichedReports.push({
