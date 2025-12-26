@@ -1586,6 +1586,114 @@ exports.fetchQCReport = async (req, res) => {
 };
 
 
+// exports.getTodayReport = async (req, res) => {
+//     try {
+//         const userId = req.user?.userId;
+
+//         if (!userId) {
+//             return res.status(401).json({
+//                 success: false,
+//                 message: "Please Provide UserId"
+//             });
+//         }
+
+//         // ================= TODAY TIME RANGE (IST) =================
+//         const today = new Date();
+
+//         // 9:30 AM IST → 04:00 UTC
+//         const startTime = new Date(today);
+//         startTime.setUTCHours(4, 0, 0, 0);
+
+//         // 5:45 PM IST → 12:15 UTC
+//         const endTime = new Date(today);
+//         endTime.setUTCHours(12, 15, 0, 0);
+
+//         const report = await OcModel.aggregate([
+//             {
+//                 $match: {
+//                     createdAt: {
+//                         $gte: startTime,
+//                         $lte: endTime
+//                     }
+//                 }
+//             },
+
+//             // ================= GROUP BY IMEI =================
+//             {
+//                 $group: {
+//                     _id: "$imeiNo",
+
+//                     barcodeBy: { $first: "$barcodeAddedByName" },
+//                     solderingBy: { $first: "$solderingByName" },
+//                     batteryCapacitorBy: { $first: "$batteryCapacitorByName" },
+//                     firmwareBy: { $first: "$firmwareByName" },
+//                     qcBy: { $first: "$qcByName" },
+
+//                     finalVisualInspection: { $last: "$finalVisualInspection" },
+//                     lastUpdatedAt: { $max: "$createdAt" }
+//                 }
+//             },
+
+//             // ================= FORMAT RESPONSE =================
+//             {
+//                 $project: {
+//                     _id: 0,
+//                     imeiNo: "$_id",
+
+//                     workFlow: {
+//                         barcode: "$barcodeBy",
+//                         soldering: "$solderingBy",
+//                         batteryAndCapacitor: "$batteryCapacitorBy",
+//                         firmware: "$firmwareBy",
+//                         qc: "$qcBy"
+//                     },
+
+//                     qcStatus: {
+//                         $cond: [
+//                             { $eq: ["$finalVisualInspection", true] },
+//                             "Completed",
+//                             "Pending"
+//                         ]
+//                     },
+
+//                     lastUpdatedAt: 1
+//                 }
+//             },
+
+//             { $sort: { lastUpdatedAt: -1 } }
+//         ]);
+
+//         if (report.length === 0) {
+//             return res.status(200).json({
+//                 success: false,
+//                 message: "No Quality Check Work Found Today (9:30 AM – 5:45 PM IST)"
+//             });
+//         }
+
+//         return res.status(200).json({
+//             success: true,
+//             message: "IMEI-wise Work Responsibility Report Fetched Successfully",
+//             totalImeis: report.length,
+//             data: report
+//         });
+
+//     } catch (error) {
+//         console.error("❌ getTodayReport Error:", error);
+//         return res.status(500).json({
+//             success: false,
+//             message: "Server Error in getTodayReport"
+//         });
+//     }
+// };
+
+
+
+
+
+
+
+
+
 exports.getTodayReport = async (req, res) => {
     try {
         const userId = req.user?.userId;
@@ -1597,17 +1705,26 @@ exports.getTodayReport = async (req, res) => {
             });
         }
 
-        // ================= TODAY TIME RANGE (IST) =================
-        const today = new Date();
+        // ================= IST DATE SAFE HANDLING =================
+        const todayIST = new Date().toLocaleString("en-US", {
+            timeZone: "Asia/Kolkata"
+        });
 
-        // 9:30 AM IST → 04:00 UTC
-        const startTime = new Date(today);
-        startTime.setUTCHours(4, 0, 0, 0);
+        const istDate = new Date(todayIST);
 
-        // 5:45 PM IST → 12:15 UTC
-        const endTime = new Date(today);
-        endTime.setUTCHours(12, 15, 0, 0);
+        // 9:30 AM IST
+        const startTime = new Date(istDate);
+        startTime.setHours(9, 30, 0, 0);
 
+        // 5:45 PM IST
+        const endTime = new Date(istDate);
+        endTime.setHours(17, 45, 0, 0);
+
+        // DEBUG (keep for verification)
+        console.log("START UTC:", startTime.toISOString());
+        console.log("END   UTC:", endTime.toISOString());
+
+        // ================= AGGREGATION =================
         const report = await OcModel.aggregate([
             {
                 $match: {
@@ -1623,6 +1740,7 @@ exports.getTodayReport = async (req, res) => {
                 $group: {
                     _id: "$imeiNo",
 
+                    // Each work is done by ONE person
                     barcodeBy: { $first: "$barcodeAddedByName" },
                     solderingBy: { $first: "$solderingByName" },
                     batteryCapacitorBy: { $first: "$batteryCapacitorByName" },
@@ -1660,9 +1778,13 @@ exports.getTodayReport = async (req, res) => {
                 }
             },
 
-            { $sort: { lastUpdatedAt: -1 } }
+            // ================= SORT LATEST =================
+            {
+                $sort: { lastUpdatedAt: -1 }
+            }
         ]);
 
+        // ================= NO DATA =================
         if (report.length === 0) {
             return res.status(200).json({
                 success: false,
@@ -1670,9 +1792,10 @@ exports.getTodayReport = async (req, res) => {
             });
         }
 
+        // ================= SUCCESS =================
         return res.status(200).json({
             success: true,
-            message: "IMEI-wise Work Responsibility Report Fetched Successfully",
+            message: "Today IMEI Workflow Report Fetched Successfully",
             totalImeis: report.length,
             data: report
         });
@@ -1685,4 +1808,3 @@ exports.getTodayReport = async (req, res) => {
         });
     }
 };
-
