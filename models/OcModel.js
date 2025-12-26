@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 
 const OcModelSchema = new mongoose.Schema({
+    createdId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+    },
     empName: {
         type: String,
         trim: true,

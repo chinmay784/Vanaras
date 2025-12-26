@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 
 const BatteryConnectionModel = new mongoose.Schema({
+    createdId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+    },
     imeiNo: { type: String, trim: true },
     batteryType: { type: String, trim: true },
     voltage: { type: String, trim: true },

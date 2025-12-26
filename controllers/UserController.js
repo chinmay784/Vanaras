@@ -790,6 +790,7 @@ exports.addSolderingDetails = async (req, res) => {
         }
         // create Soldering details
         const solderingDetails = await SolderingModel.create({
+            createdId: userId,
             barcodeImeiId,
             plus12v,
             gnd2,
@@ -985,6 +986,7 @@ exports.addBatteryConnectionDetails = async (req, res) => {
 
         // create BatteryConnection details
         const batteryConnectionDetails = await BatteryConnectionModel.create({
+            createdId: userId,
             imeiNo,
             batteryType,
             voltage,
@@ -1091,6 +1093,7 @@ exports.createFirmWare = async (req, res) => {
 
         // create FirmWare details
         const firmWareDetails = await FirmWareModel.create({
+            createdId: userId,
             imeiNo,
             iccidNo,
             slNo
@@ -1215,6 +1218,7 @@ exports.QualityCheck = async (req, res) => {
         if (!qualityData) {
             // ✅ CREATE NEW ENTRY IF NOT EXISTS
             qualityData = await OcModel.create({
+                createdId: userId,
                 empName,
                 imeiNo,
                 probePin,
@@ -1576,6 +1580,107 @@ exports.fetchQCReport = async (req, res) => {
         return res.status(500).json({
             success: false,
             message: "Server Error in fetchQCReport"
+        });
+    }
+};
+
+
+exports.getTodayReport = async (req, res) => {
+    try {
+        const userId = req.user?.userId;
+
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: "Please Provide UserId"
+            });
+        }
+
+        // ================= TODAY TIME RANGE (IST) =================
+        const today = new Date();
+
+        // 9:30 AM IST → 04:00 UTC
+        const startTime = new Date(today);
+        startTime.setUTCHours(4, 0, 0, 0);
+
+        // 5:45 PM IST → 12:15 UTC
+        const endTime = new Date(today);
+        endTime.setUTCHours(12, 15, 0, 0);
+
+        const report = await OcModel.aggregate([
+            {
+                $match: {
+                    createdAt: {
+                        $gte: startTime,
+                        $lte: endTime
+                    }
+                }
+            },
+
+            // ================= GROUP BY IMEI =================
+            {
+                $group: {
+                    _id: "$imeiNo",
+
+                    barcodeBy: { $first: "$barcodeAddedByName" },
+                    solderingBy: { $first: "$solderingByName" },
+                    batteryCapacitorBy: { $first: "$batteryCapacitorByName" },
+                    firmwareBy: { $first: "$firmwareByName" },
+                    qcBy: { $first: "$qcByName" },
+
+                    finalVisualInspection: { $last: "$finalVisualInspection" },
+                    lastUpdatedAt: { $max: "$createdAt" }
+                }
+            },
+
+            // ================= FORMAT RESPONSE =================
+            {
+                $project: {
+                    _id: 0,
+                    imeiNo: "$_id",
+
+                    workFlow: {
+                        barcode: "$barcodeBy",
+                        soldering: "$solderingBy",
+                        batteryAndCapacitor: "$batteryCapacitorBy",
+                        firmware: "$firmwareBy",
+                        qc: "$qcBy"
+                    },
+
+                    qcStatus: {
+                        $cond: [
+                            { $eq: ["$finalVisualInspection", true] },
+                            "Completed",
+                            "Pending"
+                        ]
+                    },
+
+                    lastUpdatedAt: 1
+                }
+            },
+
+            { $sort: { lastUpdatedAt: -1 } }
+        ]);
+
+        if (report.length === 0) {
+            return res.status(200).json({
+                success: false,
+                message: "No Quality Check Work Found Today (9:30 AM – 5:45 PM IST)"
+            });
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: "IMEI-wise Work Responsibility Report Fetched Successfully",
+            totalImeis: report.length,
+            data: report
+        });
+
+    } catch (error) {
+        console.error("❌ getTodayReport Error:", error);
+        return res.status(500).json({
+            success: false,
+            message: "Server Error in getTodayReport"
         });
     }
 };

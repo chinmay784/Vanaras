@@ -1,6 +1,10 @@
 const mongoose = require('mongoose');
 
 const SolderingModel = new mongoose.Schema({
+    createdId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+    },
     barcodeImeiId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "AddBarcodeIMEINo",
