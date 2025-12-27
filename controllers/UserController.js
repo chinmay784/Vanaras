@@ -1586,10 +1586,11 @@ exports.fetchQCReport = async (req, res) => {
 };
 
 
+
+
 // exports.getTodayReport = async (req, res) => {
 //     try {
 //         const userId = req.user?.userId;
-
 //         if (!userId) {
 //             return res.status(401).json({
 //                 success: false,
@@ -1597,66 +1598,149 @@ exports.fetchQCReport = async (req, res) => {
 //             });
 //         }
 
-//         // ================= TODAY TIME RANGE (IST) =================
-//         const today = new Date();
+//         // ================= IST TIME RANGE =================
+//         const todayIST = new Date().toLocaleString("en-US", {
+//             timeZone: "Asia/Kolkata"
+//         });
+//         const istDate = new Date(todayIST);
 
-//         // 9:30 AM IST → 04:00 UTC
-//         const startTime = new Date(today);
-//         startTime.setUTCHours(4, 0, 0, 0);
+//         const startTime = new Date(istDate);
+//         startTime.setHours(9, 30, 0, 0); // 9:30 AM IST
 
-//         // 5:45 PM IST → 12:15 UTC
-//         const endTime = new Date(today);
-//         endTime.setUTCHours(12, 15, 0, 0);
+//         const endTime = new Date(istDate);
+//         endTime.setHours(17, 45, 0, 0); // 5:45 PM IST
 
-//         const report = await OcModel.aggregate([
+//         // ================= AGGREGATION =================
+//         const report = await AddBarcodeIMEINo.aggregate([
 //             {
 //                 $match: {
-//                     createdAt: {
-//                         $gte: startTime,
-//                         $lte: endTime
-//                     }
+//                     createdAt: { $gte: startTime, $lte: endTime }
 //                 }
 //             },
 
-//             // ================= GROUP BY IMEI =================
+//             // ================= SOLDERING =================
 //             {
-//                 $group: {
-//                     _id: "$imeiNo",
-
-//                     barcodeBy: { $first: "$barcodeAddedByName" },
-//                     solderingBy: { $first: "$solderingByName" },
-//                     batteryCapacitorBy: { $first: "$batteryCapacitorByName" },
-//                     firmwareBy: { $first: "$firmwareByName" },
-//                     qcBy: { $first: "$qcByName" },
-
-//                     finalVisualInspection: { $last: "$finalVisualInspection" },
-//                     lastUpdatedAt: { $max: "$createdAt" }
+//                 $lookup: {
+//                     from: "solderings",
+//                     localField: "imeiNo",
+//                     foreignField: "imeiNo",
+//                     as: "soldering"
 //                 }
 //             },
 
-//             // ================= FORMAT RESPONSE =================
+//             // ================= BATTERY & CAPACITOR =================
+//             {
+//                 $lookup: {
+//                     from: "batteryconnections",
+//                     localField: "imeiNo",
+//                     foreignField: "imeiNo",
+//                     as: "battery"
+//                 }
+//             },
+
+//             // ================= FIRMWARE =================
+//             {
+//                 $lookup: {
+//                     from: "firmwares",
+//                     localField: "imeiNo",
+//                     foreignField: "imeiNo",
+//                     as: "firmware"
+//                 }
+//             },
+
+//             // ================= QC =================
+//             {
+//                 $lookup: {
+//                     from: "ocs",
+//                     localField: "imeiNo",
+//                     foreignField: "imeiNo",
+//                     as: "qc"
+//                 }
+//             },
+
+//             // ================= USERS =================
+//             {
+//                 $lookup: {
+//                     from: "users",
+//                     localField: "createdId",
+//                     foreignField: "_id",
+//                     as: "barcodeUser"
+//                 }
+//             },
+//             {
+//                 $lookup: {
+//                     from: "users",
+//                     localField: "soldering.createdId",
+//                     foreignField: "_id",
+//                     as: "solderingUser"
+//                 }
+//             },
+//             {
+//                 $lookup: {
+//                     from: "users",
+//                     localField: "battery.createdId",
+//                     foreignField: "_id",
+//                     as: "batteryUser"
+//                 }
+//             },
+//             {
+//                 $lookup: {
+//                     from: "users",
+//                     localField: "firmware.createdId",
+//                     foreignField: "_id",
+//                     as: "firmwareUser"
+//                 }
+//             },
+//             {
+//                 $lookup: {
+//                     from: "users",
+//                     localField: "qc.createdId",
+//                     foreignField: "_id",
+//                     as: "qcUser"
+//                 }
+//             },
+
+//             // ================= FINAL FORMAT =================
 //             {
 //                 $project: {
 //                     _id: 0,
-//                     imeiNo: "$_id",
+//                     imeiNo: 1,
 
 //                     workFlow: {
-//                         barcode: "$barcodeBy",
-//                         soldering: "$solderingBy",
-//                         batteryAndCapacitor: "$batteryCapacitorBy",
-//                         firmware: "$firmwareBy",
-//                         qc: "$qcBy"
+//                         barcode: {
+//                             $ifNull: [{ $arrayElemAt: ["$barcodeUser.userName", 0] }, null]
+//                         },
+//                         soldering: {
+//                             $ifNull: [{ $arrayElemAt: ["$solderingUser.userName", 0] }, null]
+//                         },
+//                         batteryAndCapacitor: {
+//                             $ifNull: [{ $arrayElemAt: ["$batteryUser.userName", 0] }, null]
+//                         },
+//                         firmware: {
+//                             $ifNull: [{ $arrayElemAt: ["$firmwareUser.userName", 0] }, null]
+//                         },
+//                         qc: {
+//                             $ifNull: [{ $arrayElemAt: ["$qcUser.userName", 0] }, null]
+//                         }
 //                     },
 
 //                     qcStatus: {
 //                         $cond: [
-//                             { $eq: ["$finalVisualInspection", true] },
+//                             { $eq: [{ $arrayElemAt: ["$qc.finalVisualInspection", 0] }, true] },
 //                             "Completed",
 //                             "Pending"
 //                         ]
 //                     },
 
-//                     lastUpdatedAt: 1
+//                     lastUpdatedAt: {
+//                         $max: [
+//                             "$updatedAt",
+//                             { $arrayElemAt: ["$soldering.updatedAt", 0] },
+//                             { $arrayElemAt: ["$battery.updatedAt", 0] },
+//                             { $arrayElemAt: ["$firmware.updatedAt", 0] },
+//                             { $arrayElemAt: ["$qc.updatedAt", 0] }
+//                         ]
+//                     }
 //                 }
 //             },
 
@@ -1666,13 +1750,13 @@ exports.fetchQCReport = async (req, res) => {
 //         if (report.length === 0) {
 //             return res.status(200).json({
 //                 success: false,
-//                 message: "No Quality Check Work Found Today (9:30 AM – 5:45 PM IST)"
+//                 message: "No IMEI Work Found Today (9:30 AM – 5:45 PM IST)"
 //             });
 //         }
 
 //         return res.status(200).json({
 //             success: true,
-//             message: "IMEI-wise Work Responsibility Report Fetched Successfully",
+//             message: "Today IMEI Workflow Report Fetched Successfully",
 //             totalImeis: report.length,
 //             data: report
 //         });
@@ -1689,15 +1773,9 @@ exports.fetchQCReport = async (req, res) => {
 
 
 
-
-
-
-
-
 exports.getTodayReport = async (req, res) => {
     try {
         const userId = req.user?.userId;
-
         if (!userId) {
             return res.status(401).json({
                 success: false,
@@ -1705,94 +1783,68 @@ exports.getTodayReport = async (req, res) => {
             });
         }
 
-        // ================= IST DATE SAFE HANDLING =================
+        // ================= IST TIME RANGE =================
         const todayIST = new Date().toLocaleString("en-US", {
             timeZone: "Asia/Kolkata"
         });
-
         const istDate = new Date(todayIST);
 
-        // 9:30 AM IST
         const startTime = new Date(istDate);
         startTime.setHours(9, 30, 0, 0);
 
-        // 5:45 PM IST
         const endTime = new Date(istDate);
         endTime.setHours(17, 45, 0, 0);
 
-        // DEBUG (keep for verification)
-        console.log("START UTC:", startTime.toISOString());
-        console.log("END   UTC:", endTime.toISOString());
+        // ================= FETCH DATA =================
+        const barcodes = await AddBarcodeIMEINo
+            .find({ createdAt: { $gte: startTime, $lte: endTime } })
+            .populate("createdId");
 
-        // ================= AGGREGATION =================
-        const report = await OcModel.aggregate([
-            {
-                $match: {
-                    createdAt: {
-                        $gte: startTime,
-                        $lte: endTime
-                    }
-                }
-            },
+        const solderings = await SolderingModel.find().populate("createdId");
+        const batteries = await BatteryConnectionModel.find().populate("createdId");
+        const firmwares = await FirmWareModel.find().populate("createdId");
+        const qcs = await OcModel.find();
 
-            // ================= GROUP BY IMEI =================
-            {
-                $group: {
-                    _id: "$imeiNo",
+        // ================= BUILD REPORT PER IMEI =================
+        const report = barcodes.map(barcode => {
+            const imei = barcode.imeiNo;
 
-                    // Each work is done by ONE person
-                    barcodeBy: { $first: "$barcodeAddedByName" },
-                    solderingBy: { $first: "$solderingByName" },
-                    batteryCapacitorBy: { $first: "$batteryCapacitorByName" },
-                    firmwareBy: { $first: "$firmwareByName" },
-                    qcBy: { $first: "$qcByName" },
+            const soldering = solderings.find(
+                s => String(s.barcodeImeiId) === String(barcode._id)
+            );
 
-                    finalVisualInspection: { $last: "$finalVisualInspection" },
-                    lastUpdatedAt: { $max: "$createdAt" }
-                }
-            },
+            const battery = batteries.find(b => b.imeiNo === imei);
+            const firmware = firmwares.find(f => f.imeiNo === imei);
+            const qc = qcs.find(q => q.imeiNo === imei);
 
-            // ================= FORMAT RESPONSE =================
-            {
-                $project: {
-                    _id: 0,
-                    imeiNo: "$_id",
+            return {
+                imeiNo: imei,
 
-                    workFlow: {
-                        barcode: "$barcodeBy",
-                        soldering: "$solderingBy",
-                        batteryAndCapacitor: "$batteryCapacitorBy",
-                        firmware: "$firmwareBy",
-                        qc: "$qcBy"
-                    },
+                workFlow: {
+                    barcode: barcode.createdId?.userName || "Pending",
+                    soldering: soldering?.createdId?.userName || "Pending",
+                    batteryAndCapacitor: battery?.createdId?.userName || "Pending",
 
-                    qcStatus: {
-                        $cond: [
-                            { $eq: ["$finalVisualInspection", true] },
-                            "Completed",
-                            "Pending"
-                        ]
-                    },
+                    // ✅ FIXED: firmware name comes correctly
+                    firmware: firmware?.createdId?.userName || "Pending",
 
-                    lastUpdatedAt: 1
-                }
-            },
+                    qc: qc?.empName || "Pending"
+                },
 
-            // ================= SORT LATEST =================
-            {
-                $sort: { lastUpdatedAt: -1 }
-            }
-        ]);
+                qcStatus: qc?.finalVisualInspection ? "Completed" : "Pending",
 
-        // ================= NO DATA =================
-        if (report.length === 0) {
-            return res.status(200).json({
-                success: false,
-                message: "No Quality Check Work Found Today (9:30 AM – 5:45 PM IST)"
-            });
-        }
+                lastUpdatedAt: new Date(
+                    Math.max(
+                        barcode.updatedAt || 0,
+                        soldering?.updatedAt || 0,
+                        battery?.updatedAt || 0,
+                        firmware?.updatedAt || 0,
+                        qc?.updatedAt || 0
+                    )
+                )
+            };
+        });
 
-        // ================= SUCCESS =================
         return res.status(200).json({
             success: true,
             message: "Today IMEI Workflow Report Fetched Successfully",
@@ -1808,3 +1860,7 @@ exports.getTodayReport = async (req, res) => {
         });
     }
 };
+
+
+
+
