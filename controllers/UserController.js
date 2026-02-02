@@ -1241,7 +1241,7 @@ function generateNextSlNo(lastSlNo) {
     const month = String(now.getMonth() + 1).padStart(2, "0");
     const year = now.getFullYear();
 
-    let nextNumber = 8510; // default start number
+    let nextNumber = 8509; // default start number
 
     if (lastSlNo) {
         const match = lastSlNo.match(/A(\d+)$/);
