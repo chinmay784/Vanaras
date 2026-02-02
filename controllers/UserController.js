@@ -1227,15 +1227,15 @@ exports.deleteFirmWareDetails = async (req, res) => {
             })
         }
 
-        const { firmWareId } = req.body;
-        if (!firmWareId) {
+        const { imeiNo } = req.body;
+        if (!imeiNo) {
             return res.status(200).json({
                 success: false,
-                message: 'Please Provide firmWareId'
+                message: 'Please Provide imeiNo'
             })
         }
         // find and delete FirmWare details
-        const firmWareDetails = await FirmWareModel.findByIdAndDelete(firmWareId);
+        const firmWareDetails = await FirmWareModel.findOneAndDelete({ imeiNo });
         if (!firmWareDetails) {
             return res.status(200).json({
                 success: false,
