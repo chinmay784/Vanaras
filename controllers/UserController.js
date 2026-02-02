@@ -1126,7 +1126,7 @@ exports.createFirmWare = async (req, res) => {
 
 
 // fetch firmware By Id
-exports.fetchFirmwareById = async (req, res) =>{
+exports.fetchFirmwareByImeiNo = async (req, res) =>{
     try {
         const userId = req.user.userId;
         if (!userId) {
@@ -1136,16 +1136,16 @@ exports.fetchFirmwareById = async (req, res) =>{
             })
         }
 
-        const { firmWareId } = req.body;
+        const { imeiNo } = req.body;
 
-        if (!firmWareId) {
+        if (!imeiNo) {
             return res.status(200).json({
                 success: false,
-                message: 'Please Provide firmWareId'
+                message: 'Please Provide imeiNo'
             })
         }
-        // find FirmWare details by Id
-        const firmWareDetails = await FirmWareModel.findById(firmWareId);
+        // find FirmWare details by imeiNo
+        const firmWareDetails = await FirmWareModel.findOne({ imeiNo });
         if (!firmWareDetails) {
             return res.status(200).json({
                 success: false,
