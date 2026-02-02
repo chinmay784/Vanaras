@@ -1125,6 +1125,172 @@ exports.createFirmWare = async (req, res) => {
 }
 
 
+// fetch firmware By Id
+exports.fetchFirmwareById = async (req, res) =>{
+    try {
+        const userId = req.user.userId;
+        if (!userId) {
+            return res.status(200).json({
+                success: false,
+                message: 'Please Provide UserId'
+            })
+        }
+
+        const { firmWareId } = req.body;
+
+        if (!firmWareId) {
+            return res.status(200).json({
+                success: false,
+                message: 'Please Provide firmWareId'
+            })
+        }
+        // find FirmWare details by Id
+        const firmWareDetails = await FirmWareModel.findById(firmWareId);
+        if (!firmWareDetails) {
+            return res.status(200).json({
+                success: false,
+                message: 'FirmWare Details not found'
+            })
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'FirmWare Details Fetched SuccessFully',
+            firmWareDetails
+        })
+
+    } catch (error) {
+        console.log(error,error.message);
+        return res.status(500).json({
+            success:false,
+            message:"Server Error in fetchFirmwareById"
+        })
+    }
+}
+
+// edit Firmware Details
+exports.editFirmWareDetails = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+
+        if (!userId) {
+            return res.status(200).json({
+                success: false,
+                message: 'Please Provide UserId'
+            })
+        }
+        const { firmWareId, imeiNo, iccidNo, slNo } = req.body;
+
+       
+        if (!firmWareId) {
+            return res.status(200).json({
+                success: false,
+                message: 'Please Provide firmWareId'
+            })
+        }
+        // find and update FirmWare details
+        const firmWareDetails = await FirmWareModel.findById(firmWareId);
+        if (!firmWareDetails) {
+            return res.status(200).json({
+                success: false,
+                message: 'FirmWare Details not found'
+            })
+        }
+        firmWareDetails.imeiNo = imeiNo || firmWareDetails.imeiNo;
+        firmWareDetails.iccidNo = iccidNo || firmWareDetails.iccidNo;
+        firmWareDetails.slNo = slNo || firmWareDetails.slNo;
+        await firmWareDetails.save();
+        return res.status(200).json({
+            success: true,
+            message: 'FirmWare Details Updated SuccessFully',
+            firmWareDetails
+        })
+
+    } catch (error) {
+        console.log(error, error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server Error in editFirmWareDetails"
+        })
+    }
+}
+
+// delete FirmWare Details 
+exports.deleteFirmWareDetails = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+
+        if (!userId) {
+            return res.status(200).json({
+                success: false,
+                message: 'Please Provide UserId'
+            })
+        }
+
+        const { firmWareId } = req.body;
+        if (!firmWareId) {
+            return res.status(200).json({
+                success: false,
+                message: 'Please Provide firmWareId'
+            })
+        }
+        // find and delete FirmWare details
+        const firmWareDetails = await FirmWareModel.findByIdAndDelete(firmWareId);
+        if (!firmWareDetails) {
+            return res.status(200).json({
+                success: false,
+                message: 'FirmWare Details not found'
+            })
+        }
+
+
+        // also delete in batteryConnectionModel 
+        const batteryEntry = await BatteryConnectionModel.findOneAndDelete({ imeiNo: firmWareDetails.imeiNo });
+        if(!batteryEntry){
+            return res.status(200).json({
+                success: false,
+                message: 'Battery Connection Details not found to delete'
+            })
+        }
+
+        // also delete in solderingModel
+        const imeiEntry = await AddBarcodeIMEINo.findOne({ imeiNo: firmWareDetails.imeiNo });
+        if (imeiEntry) {
+            const solderingEntry = await SolderingModel.findOneAndDelete({ barcodeImeiId: imeiEntry._id });
+            if (!solderingEntry) {
+                return res.status(200).json({
+                    success: false,
+                    message: 'Soldering Details not found to delete'
+                })
+            }
+        }
+
+        // also delete in AddBarcodeIMEINoModel
+        const imeiDeleted = await AddBarcodeIMEINo.findOneAndDelete({ imeiNo: firmWareDetails.imeiNo });
+        if (!imeiDeleted) {
+            return res.status(200).json({
+                success: false,
+                message: 'IMEI Details not found to delete'
+            })
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: 'FirmWare Details Deleted SuccessFully',
+            firmWareDetails
+        })
+
+    } catch (error) {
+        console.log(error, error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server Error in deleteFirmWareDetails"
+        })
+    }
+}
+
+
+
 exports.fetchFirmWareDetails = async (req, res) => {
     try {
         const userId = req.user?.userId;
@@ -1591,93 +1757,7 @@ exports.fetchQCReport = async (req, res) => {
 
 
 
-// exports.getTodayReport = async (req, res) => {
-//     try {
-//         const userId = req.user?.userId;
-//         if (!userId) {
-//             return res.status(401).json({
-//                 success: false,
-//                 message: "Please Provide UserId"
-//             });
-//         }
 
-//         // ================= IST TIME RANGE =================
-//         const todayIST = new Date().toLocaleString("en-US", {
-//             timeZone: "Asia/Kolkata"
-//         });
-//         const istDate = new Date(todayIST);
-
-//         const startTime = new Date(istDate);
-//         startTime.setHours(9, 30, 0, 0);
-
-//         const endTime = new Date(istDate);
-//         endTime.setHours(17, 45, 0, 0);
-
-//         // ================= FETCH DATA =================
-//         const barcodes = await AddBarcodeIMEINo
-//             .find({ createdAt: { $gte: startTime, $lte: endTime } })
-//             .populate("createdId");
-
-//         const solderings = await SolderingModel.find().populate("createdId");
-//         const batteries = await BatteryConnectionModel.find().populate("createdId");
-//         const firmwares = await FirmWareModel.find().populate("createdId");
-//         const qcs = await OcModel.find();
-
-//         // ================= BUILD REPORT PER IMEI =================
-//         const report = barcodes.map(barcode => {
-//             const imei = barcode.imeiNo;
-
-//             const soldering = solderings.find(
-//                 s => String(s.barcodeImeiId) === String(barcode._id)
-//             );
-
-//             const battery = batteries.find(b => b.imeiNo === imei);
-//             const firmware = firmwares.find(f => f.imeiNo === imei);
-//             const qc = qcs.find(q => q.imeiNo === imei);
-
-//             return {
-//                 imeiNo: imei,
-
-//                 workFlow: {
-//                     barcode: barcode.createdId?.userName || "Pending",
-//                     soldering: soldering?.createdId?.userName || "Pending",
-//                     batteryAndCapacitor: battery?.createdId?.userName || "Pending",
-
-//                     // ✅ FIXED: firmware name comes correctly
-//                     firmware: firmware?.createdId?.userName || "Pending",
-
-//                     qc: qc?.empName || "Pending"
-//                 },
-
-//                 qcStatus: qc?.finalVisualInspection ? "Completed" : "Pending",
-
-//                 lastUpdatedAt: new Date(
-//                     Math.max(
-//                         barcode.updatedAt || 0,
-//                         soldering?.updatedAt || 0,
-//                         battery?.updatedAt || 0,
-//                         firmware?.updatedAt || 0,
-//                         qc?.updatedAt || 0
-//                     )
-//                 )
-//             };
-//         });
-
-//         return res.status(200).json({
-//             success: true,
-//             message: "Today IMEI Workflow Report Fetched Successfully",
-//             totalImeis: report.length,
-//             data: report
-//         });
-
-//     } catch (error) {
-//         console.error("❌ getTodayReport Error:", error);
-//         return res.status(500).json({
-//             success: false,
-//             message: "Server Error in getTodayReport"
-//         });
-//     }
-// };
 
 
 

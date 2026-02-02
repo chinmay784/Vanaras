@@ -1,5 +1,5 @@
 const express = require("express");
-const { createSuperAdmin, login, createDepartment, fetchAllDepartment, createHeadADepartment, fetchAllHeadDepartment, addEmployee, fetchAllEmployee, AssignWorkToEmployee, epartment_Head_Show_Assign_work_Employee, FetchLoginEmployeeWorkList, createProduct, fetchProduct, addBarCode, fetchAllBarCodeIMEINo, veriFyImeiNoAgain, addSolderingDetails, fetchSolderingDetailsandImeiNo, verifySolderingDetails, addBatteryConnectionDetails, fetchBatteryConnectionDetails, createFirmWare, fetchFirmWareDetails, QualityCheck, FetchallQualityCheck, getTodayFirmwareReport, showAllDateReports, fetchQCReport, getTodayReport } = require("../controllers/UserController");
+const { createSuperAdmin, login, createDepartment, fetchAllDepartment, createHeadADepartment, fetchAllHeadDepartment, addEmployee, fetchAllEmployee, AssignWorkToEmployee, epartment_Head_Show_Assign_work_Employee, FetchLoginEmployeeWorkList, createProduct, fetchProduct, addBarCode, fetchAllBarCodeIMEINo, veriFyImeiNoAgain, addSolderingDetails, fetchSolderingDetailsandImeiNo, verifySolderingDetails, addBatteryConnectionDetails, fetchBatteryConnectionDetails, createFirmWare, fetchFirmWareDetails, QualityCheck, FetchallQualityCheck, getTodayFirmwareReport, showAllDateReports, fetchQCReport, getTodayReport, fetchFirmwareById, editFirmWareDetails, deleteFirmWareDetails } = require("../controllers/UserController");
 const { authMiddelWere } = require("../middelWare/authMiddelWere");
 const router = express.Router()
 
@@ -26,6 +26,11 @@ router.post("/verifySolderingDetails",authMiddelWere,verifySolderingDetails);
 router.post("/addBatteryConnectionDetails",authMiddelWere,addBatteryConnectionDetails);
 router.get("/fetchBatteryConnectionDetails",authMiddelWere,fetchBatteryConnectionDetails);
 router.post("/createFirmWare",authMiddelWere,createFirmWare);
+
+router.post("/fetchFirmwareById",authMiddelWere,fetchFirmwareById);
+router.post("/editFirmWareDetails",authMiddelWere,editFirmWareDetails);
+router.post("/deleteFirmWareDetails",authMiddelWere,deleteFirmWareDetails)
+
 router.get("/fetchFirmWareDetails",authMiddelWere,fetchFirmWareDetails);
 router.post("/QualityCheck",authMiddelWere,QualityCheck);
 router.get("/FetchallQualityCheck",authMiddelWere,FetchallQualityCheck);
