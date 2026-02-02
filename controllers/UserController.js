@@ -1073,17 +1073,16 @@ exports.fetchBatteryConnectionDetails = async (req, res) => {
 }
 
 
-function generateSlNo(lastNumber = 8509) {
+function generateSlNo(lastNumber) {
     const now = new Date();
 
     const day = String(now.getDate()).padStart(2, "0");
     const month = String(now.getMonth() + 1).padStart(2, "0");
     const year = now.getFullYear();
 
-    const nextNumber = lastNumber + 1;
-
-    return `TIA/${day}${month}${year}A${nextNumber}`;
+    return `TIA/${day}${month}${year}A${lastNumber}`;
 }
+
 
 // exports.createFirmWare = async (req, res) => {
 //     try {
