@@ -1,5 +1,5 @@
 const express = require("express");
-const { createSuperAdmin, login, createDepartment, fetchAllDepartment, createHeadADepartment, fetchAllHeadDepartment, addEmployee, fetchAllEmployee, AssignWorkToEmployee, epartment_Head_Show_Assign_work_Employee, FetchLoginEmployeeWorkList, createProduct, fetchProduct, addBarCode, fetchAllBarCodeIMEINo, veriFyImeiNoAgain, addSolderingDetails, fetchSolderingDetailsandImeiNo, verifySolderingDetails, addBatteryConnectionDetails, fetchBatteryConnectionDetails, createFirmWare, fetchFirmWareDetails, QualityCheck, FetchallQualityCheck, getTodayFirmwareReport, showAllDateReports, fetchQCReport, getTodayReport, editFirmWareDetails, deleteFirmWareDetails, fetchFirmwareByImeiNo } = require("../controllers/UserController");
+const { createSuperAdmin, login, createDepartment, fetchAllDepartment, createHeadADepartment, fetchAllHeadDepartment, addEmployee, fetchAllEmployee, AssignWorkToEmployee, epartment_Head_Show_Assign_work_Employee, FetchLoginEmployeeWorkList, createProduct, fetchProduct, addBarCode, fetchAllBarCodeIMEINo, veriFyImeiNoAgain, addSolderingDetails, fetchSolderingDetailsandImeiNo, verifySolderingDetails, addBatteryConnectionDetails, fetchBatteryConnectionDetails, createFirmWare, fetchFirmWareDetails, QualityCheck, FetchallQualityCheck, getTodayFirmwareReport, showAllDateReports, fetchQCReport, getTodayReport, editFirmWareDetails, deleteFirmWareDetails, fetchFirmwareByImeiNo, getNextFirmwareSlNo } = require("../controllers/UserController");
 const { authMiddelWere } = require("../middelWare/authMiddelWere");
 const router = express.Router()
 
@@ -25,6 +25,7 @@ router.get("/fetchSolderingDetailsandImeiNo",authMiddelWere,fetchSolderingDetail
 router.post("/verifySolderingDetails",authMiddelWere,verifySolderingDetails);
 router.post("/addBatteryConnectionDetails",authMiddelWere,addBatteryConnectionDetails);
 router.get("/fetchBatteryConnectionDetails",authMiddelWere,fetchBatteryConnectionDetails);
+router.get("/getNextFirmwareSlNo",authMiddelWere,getNextFirmwareSlNo)
 router.post("/createFirmWare",authMiddelWere,createFirmWare);
 
 router.post("/fetchFirmwareByImeiNo",authMiddelWere,fetchFirmwareByImeiNo);

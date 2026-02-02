@@ -1163,6 +1163,120 @@ function generateSlNo(lastNumber) {
 //     }
 // }
 
+
+
+// exports.createFirmWare = async (req, res) => {
+//     try {
+//         const userId = req.user?.userId;
+//         if (!userId) {
+//             return res.status(401).json({
+//                 success: false,
+//                 message: "Unauthorized"
+//             });
+//         }
+
+//         const { imeiNo, iccidNo } = req.body;
+//         if (!imeiNo || !iccidNo) {
+//             return res.status(400).json({
+//                 success: false,
+//                 message: "Please provide imeiNo and iccidNo"
+//             });
+//         }
+
+//         // 🔍 Find last firmware (by latest created)
+//         const lastFirmware = await FirmWareModel
+//             .findOne({ slNo: { $regex: "^TIA/" } })
+//             .sort({ createdAt: -1 });
+
+//         let nextNumber;
+
+//         if (!lastFirmware) {
+//             // ✅ FIRST RECORD
+//             nextNumber = 8510;
+//         } else {
+//             // ✅ INCREMENT FROM PREVIOUS
+//             const match = lastFirmware.slNo.match(/A(\d+)$/);
+//             nextNumber = match ? parseInt(match[1]) + 1 : 8510;
+//         }
+
+//         const slNo = generateSlNo(nextNumber);
+
+//         // ✅ CREATE ONLY ONCE
+//         const firmWareDetails = await FirmWareModel.create({
+//             createdId: userId,
+//             imeiNo,
+//             iccidNo,
+//             slNo
+//         });
+
+//         // 🔄 Update battery status if exists
+//         const batteryEntry = await BatteryConnectionModel.findOne({ imeiNo });
+//         if (batteryEntry) {
+//             batteryEntry.overAllassemblyStatus = true;
+//             await batteryEntry.save();
+//         }
+
+//         return res.status(201).json({
+//             success: true,
+//             message: "FirmWare Details Added Successfully",
+//             firmWareDetails
+//         });
+
+//     } catch (error) {
+//         console.error("createFirmWare error:", error.message);
+//         return res.status(500).json({
+//             success: false,
+//             message: "Server Error in createFirmWare"
+//         });
+//     }
+// };
+
+
+
+
+function generateNextSlNo(lastSlNo) {
+    const now = new Date();
+
+    const day = String(now.getDate()).padStart(2, "0");
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const year = now.getFullYear();
+
+    let nextNumber = 8510; // default start number
+
+    if (lastSlNo) {
+        const match = lastSlNo.match(/A(\d+)$/);
+        if (match) {
+            nextNumber = parseInt(match[1]) + 1;
+        }
+    }
+
+    return `TIA/${day}${month}${year}A${nextNumber}`;
+}
+exports.getNextFirmwareSlNo = async (req, res) => {
+    try {
+        const lastFirmware = await FirmWareModel
+            .findOne({ slNo: { $regex: "^TIA/" } })
+            .sort({ createdAt: -1 })
+            .select("slNo");
+
+        const nextSlNo = generateNextSlNo(lastFirmware?.slNo);
+
+        return res.status(200).json({
+            success: true,
+            previousSlNo: lastFirmware?.slNo || null,
+            nextSlNo
+        });
+
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            message: "Error fetching next firmware slNo"
+        });
+    }
+};
+
+
 exports.createFirmWare = async (req, res) => {
     try {
         const userId = req.user?.userId;
@@ -1174,32 +1288,23 @@ exports.createFirmWare = async (req, res) => {
         }
 
         const { imeiNo, iccidNo } = req.body;
+
         if (!imeiNo || !iccidNo) {
             return res.status(400).json({
                 success: false,
-                message: "Please provide imeiNo and iccidNo"
+                message: "imeiNo and iccidNo are required"
             });
         }
 
-        // 🔍 Find last firmware (by latest created)
+        // 🔍 Fetch last firmware
         const lastFirmware = await FirmWareModel
             .findOne({ slNo: { $regex: "^TIA/" } })
             .sort({ createdAt: -1 });
 
-        let nextNumber;
+        // 🔢 Generate next slNo
+        const slNo = generateNextSlNo(lastFirmware?.slNo);
 
-        if (!lastFirmware) {
-            // ✅ FIRST RECORD
-            nextNumber = 8510;
-        } else {
-            // ✅ INCREMENT FROM PREVIOUS
-            const match = lastFirmware.slNo.match(/A(\d+)$/);
-            nextNumber = match ? parseInt(match[1]) + 1 : 8510;
-        }
-
-        const slNo = generateSlNo(nextNumber);
-
-        // ✅ CREATE ONLY ONCE
+        // 💾 Create firmware
         const firmWareDetails = await FirmWareModel.create({
             createdId: userId,
             imeiNo,
@@ -1214,17 +1319,17 @@ exports.createFirmWare = async (req, res) => {
             await batteryEntry.save();
         }
 
-        return res.status(201).json({
+        return res.status(200).json({
             success: true,
-            message: "FirmWare Details Added Successfully",
+            message: "FirmWare created successfully",
             firmWareDetails
         });
 
     } catch (error) {
-        console.error("createFirmWare error:", error.message);
+        console.error(error);
         return res.status(500).json({
             success: false,
-            message: "Server Error in createFirmWare"
+            message: "Server error in createFirmWare"
         });
     }
 };
