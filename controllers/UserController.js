@@ -1996,9 +1996,9 @@ exports.getTodayReport = async (req, res) => {
         const startIST = new Date(istNow);
         startIST.setHours(9, 30, 0, 0);
 
-        // 5:45 PM IST
+        // 11:00 PM IST
         const endIST = new Date(istNow);
-        endIST.setHours(17, 45, 0, 0);
+        endIST.setHours(23, 0, 0, 0);
 
         // Convert IST → UTC for MongoDB
         const startUTC = new Date(startIST.getTime() - istOffset);
