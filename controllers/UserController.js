@@ -531,7 +531,7 @@ exports.FetchLoginEmployeeWorkList = async (req, res) => {
                     path: "whoAssignWorkId",
                     select: "DepartmentHeadName DepartmentName email mobile"
                 }
-            });
+            }).populate("productId", "productName modelNo partNo TacNo productType");
 
         if (!emp) {
             return res.status(200).json({
