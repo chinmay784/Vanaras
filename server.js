@@ -18,10 +18,11 @@ app.use(cors({
 app.use("/api/v1/superadmin", require("./routes/superAdminRoute"));
 
 connectToDatabase()
-app.listen(PORT, (req, res) => {
-    console.log(`Server Running on PORT ${PORT} , and URL : http://localhost:2000`);
+app.listen(PORT, "0.0.0.0", () => {
+    console.log("Server running on port 2000");
 });
 
+
 app.get("/", (req, res) => {
-    res.send("Server Is working")
+    res.send("🚀Traxo Production Server Is working")
 })

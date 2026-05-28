@@ -415,14 +415,25 @@ exports.AssignWorkToEmployee = async (req, res) => {
             });
         }
 
-        const { workTitel, workDescription, empId } = req.body;
+        const { workTitel, workDescription, empId , productId,productName} = req.body;
 
-        if (!workDescription || !workTitel || !empId) {
+        if (!workDescription || !workTitel || !empId || !productId || !productName) {
             return res.status(200).json({
                 success: false,
-                message: "Please Provide workDescription or workTitel or empId",
+                message: "Please Provide workDescription or workTitel or empId or productId or productName",
             });
         }
+
+
+        // Check Product is Exist or Not
+        const prodectExist = await Product.findById(productId);
+        if (!prodectExist) {
+            return res.status(200).json({
+                success: false,
+                message: "Product Not Found",
+            });
+        }
+
 
         // Create assign work
         const workAssign = await AssignWork.create({
@@ -430,6 +441,8 @@ exports.AssignWorkToEmployee = async (req, res) => {
             workDescription,
             workAssignToId: empId,
             whoAssignWorkId: userId, // IMPORTANT FIX
+            productId,
+            productName,
         });
 
         // Push into employee.assignWork
