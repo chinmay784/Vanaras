@@ -509,6 +509,60 @@ exports.epartment_Head_Show_Assign_work_Employee = async (req, res) => {
 
 
 // Login Employee Fetch Work List
+// exports.FetchLoginEmployeeWorkList = async (req, res) => {
+//     try {
+//         const userId = req.user.userId;
+
+//         if (!userId) {
+//             return res.status(200).json({
+//                 success: false,
+//                 message: "Please Provide UserId",
+//             });
+//         }
+
+//         const user = await User.findById(userId);
+
+//         // also find in employee collections 
+//         const emp = await Employee.findById(user.employeeId)
+//             .populate({
+//                 path: "assignWork",
+//                 model: "AssignWork",
+//                 populate: {
+//                     path: "whoAssignWorkId",
+//                     select: "DepartmentHeadName DepartmentName email mobile"
+//                 }
+//             });
+
+//         if (!emp) {
+//             return res.status(200).json({
+//                 success: false,
+//                 message: "emp not Found"
+//             })
+//         };
+
+//         const newres = emp.assignWork.map(async (work) => {
+//             let product = await Product.findById(work.productId)
+//             return product;
+//         })
+
+
+//         return res.status(200).json({
+//             success: true,
+//             message: "Fetched SuccessFully",
+//             newres,
+//         })
+
+//     } catch (error) {
+//         console.log(error, error.message);
+//         return res.status(500).json({
+//             success: false,
+//             message: "Server Error in FetchLoginEmployeeWorkList"
+//         })
+//     }
+// }
+
+
+
 exports.FetchLoginEmployeeWorkList = async (req, res) => {
     try {
         const userId = req.user.userId;
@@ -522,7 +576,6 @@ exports.FetchLoginEmployeeWorkList = async (req, res) => {
 
         const user = await User.findById(userId);
 
-        // also find in employee collections 
         const emp = await Employee.findById(user.employeeId)
             .populate({
                 path: "assignWork",
@@ -531,29 +584,43 @@ exports.FetchLoginEmployeeWorkList = async (req, res) => {
                     path: "whoAssignWorkId",
                     select: "DepartmentHeadName DepartmentName email mobile"
                 }
-            }).populate("productId", "productName modelNo partNo TacNo productType");
+            });
 
         if (!emp) {
             return res.status(200).json({
                 success: false,
                 message: "emp not Found"
+            });
+        }
+
+        // ✅ FIX
+        const newres = await Promise.all(
+            emp.assignWork.map(async (work) => {
+
+                const product = await Product.findById(work.productId);
+
+                return {
+                    ...work.toObject(),
+                    productDetails: product
+                };
             })
-        };
+        );
 
         return res.status(200).json({
             success: true,
-            message: "Fetched SuccessFully",
-            emp,
-        })
+            message: "Fetched Successfully",
+            data: newres,
+        });
 
     } catch (error) {
         console.log(error, error.message);
+
         return res.status(500).json({
             success: false,
             message: "Server Error in FetchLoginEmployeeWorkList"
-        })
+        });
     }
-}
+};
 
 
 // create Product By SuperAdmin
