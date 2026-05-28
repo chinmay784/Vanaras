@@ -19,10 +19,10 @@ const AssignWorkSchema = new mongoose.Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref:"Product",
         },
-        productName:{
-            type: String,
-            trim: true,
-        },
+        // productName:{
+        //     type: String,
+        //     trim: true,
+        // },
         status: {
             type: Boolean,
             default: false,

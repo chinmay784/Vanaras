@@ -415,12 +415,12 @@ exports.AssignWorkToEmployee = async (req, res) => {
             });
         }
 
-        const { workTitel, workDescription, empId , productId,productName} = req.body;
+        const { workTitel, workDescription, empId , productId} = req.body;
 
-        if (!workDescription || !workTitel || !empId || !productId || !productName) {
+        if (!workDescription || !workTitel || !empId || !productId ) {
             return res.status(200).json({
                 success: false,
-                message: "Please Provide workDescription or workTitel or empId or productId or productName",
+                message: "Please Provide workDescription or workTitel or empId or productId ",
             });
         }
 
@@ -442,7 +442,7 @@ exports.AssignWorkToEmployee = async (req, res) => {
             workAssignToId: empId,
             whoAssignWorkId: userId, // IMPORTANT FIX
             productId,
-            productName,
+            // productName,
         });
 
         // Push into employee.assignWork
