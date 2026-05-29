@@ -1629,7 +1629,16 @@ exports.fetchFirmWareDetails = async (req, res) => {
             });
         }
 
-        const firmWareDetailsList = await FirmWareModel.find({});
+        const {productId} = req.body;
+        if (!productId) {
+            return res.status(401).json({
+                success: false,
+                message: 'productId missing'
+            });
+        }
+
+
+        const firmWareDetailsList = await FirmWareModel.find({"productId":productId});
 
         if (!firmWareDetailsList || firmWareDetailsList.length === 0) {
             return res.status(404).json({

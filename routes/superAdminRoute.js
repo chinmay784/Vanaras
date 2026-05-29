@@ -32,7 +32,7 @@ router.post("/fetchFirmwareByImeiNo",authMiddelWere,fetchFirmwareByImeiNo);
 router.post("/editFirmWareDetails",authMiddelWere,editFirmWareDetails);
 router.post("/deleteFirmWareDetails",authMiddelWere,deleteFirmWareDetails)
 
-router.get("/fetchFirmWareDetails",authMiddelWere,fetchFirmWareDetails);
+router.post("/fetchFirmWareDetails",authMiddelWere,fetchFirmWareDetails);
 router.post("/QualityCheck",authMiddelWere,QualityCheck);
 router.get("/FetchallQualityCheck",authMiddelWere,FetchallQualityCheck);
 router.get("/getTodayFirmwareReport",authMiddelWere,getTodayFirmwareReport);
