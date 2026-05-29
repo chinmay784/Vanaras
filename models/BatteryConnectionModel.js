@@ -8,6 +8,10 @@ const BatteryConnectionModel = new mongoose.Schema({
     imeiNo: { type: String, trim: true },
     batteryType: { type: String, trim: true },
     voltage: { type: String, trim: true },
+    productId:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Product"
+    },
     batteryConnectedStatus: {
         type: Boolean,
         default: false,

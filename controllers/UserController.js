@@ -1069,8 +1069,8 @@ exports.addBatteryConnectionDetails = async (req, res) => {
             })
         }
 
-        const { imeiNo, batteryType, voltage, batteryConnectedStatus, capacitorConnectedStatus } = req.body;
-        if (!imeiNo || !batteryType || !voltage) {
+        const { imeiNo, batteryType, voltage, batteryConnectedStatus, capacitorConnectedStatus ,productId} = req.body;
+        if (!imeiNo || !batteryType || !voltage || !productId) {
             return res.status(200).json({
                 success: false,
                 message: 'Please Provide imeiNo, batteryType, voltage batteryConnectedStatus capacitorConnectedStatus'
@@ -1091,6 +1091,7 @@ exports.addBatteryConnectionDetails = async (req, res) => {
         const batteryConnectionDetails = await BatteryConnectionModel.create({
             createdId: userId,
             imeiNo,
+            productId,
             batteryType,
             voltage,
             batteryConnectedStatus,
