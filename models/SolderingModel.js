@@ -9,6 +9,10 @@ const SolderingModel = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "AddBarcodeIMEINo",
     },
+    productId:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Product"
+    },
     plus12v: { type: String, trim: true },
     gnd2: { type: String, trim: true },
     ignition: { type: String, trim: true },

@@ -415,9 +415,9 @@ exports.AssignWorkToEmployee = async (req, res) => {
             });
         }
 
-        const { workTitel, workDescription, empId , productId} = req.body;
+        const { workTitel, workDescription, empId, productId } = req.body;
 
-        if (!workDescription || !workTitel || !empId || !productId ) {
+        if (!workDescription || !workTitel || !empId || !productId) {
             return res.status(200).json({
                 success: false,
                 message: "Please Provide workDescription or workTitel or empId or productId ",
@@ -720,7 +720,7 @@ exports.addBarCode = async (req, res) => {
         }
 
 
-        const { batchNo, lotNo, imeiNo ,productId} = req.body;
+        const { batchNo, lotNo, imeiNo, productId } = req.body;
 
         if (!batchNo || !lotNo || !imeiNo || !productId) {
             return res.status(200).json({
@@ -775,12 +775,12 @@ exports.fetchAllBarCodeIMEINo = async (req, res) => {
             })
         }
 
-        const {productId} = req.body;
+        const { productId } = req.body;
 
-        if(!productId){
+        if (!productId) {
             return res.status(200).json({
-                success:false,
-                message:"Please Provide ProductId"
+                success: false,
+                message: "Please Provide ProductId"
             })
         }
 
@@ -872,9 +872,9 @@ exports.addSolderingDetails = async (req, res) => {
             })
         }
 
-        const { barcodeImeiId, plus12v, gnd2, ignition, din1, din2, scs, led, sos4v, an1, an2, din3, op2, gnd13, op1, tx, rx, gnd17 } = req.body;
+        const { barcodeImeiId, plus12v, gnd2, ignition, din1, din2, scs, led, sos4v, an1, an2, din3, op2, gnd13, op1, tx, rx, gnd17 ,productId } = req.body;
 
-        if (!barcodeImeiId || !plus12v || !gnd2 || !ignition || !din1 || !din2 || !scs || !led || !sos4v || !an1 || !an2 || !din3 || !op2 || !gnd13 || !op1 || !tx || !rx || !gnd17) {
+        if (!barcodeImeiId || !plus12v || !gnd2 || !ignition || !din1 || !din2 || !scs || !led || !sos4v || !an1 || !an2 || !din3 || !op2 || !gnd13 || !op1 || !tx || !rx || !gnd17 || !productId) {
             return res.status(200).json({
                 success: false,
                 message: 'Please Provide All Fields'
@@ -884,6 +884,7 @@ exports.addSolderingDetails = async (req, res) => {
         const solderingDetails = await SolderingModel.create({
             createdId: userId,
             barcodeImeiId,
+            productId,
             plus12v,
             gnd2,
             ignition,
@@ -939,8 +940,17 @@ exports.fetchSolderingDetailsandImeiNo = async (req, res) => {
             })
         }
 
+        const { productId } = req.body;
+        if (!productId) {
+            return res.status(200).json({
+                success: false,
+                message: 'Please Provide productId'
+            })
+        }
+
+
         // fetch all Soldering details with imeiNo
-        const solderingDetailsList = await SolderingModel.find({})
+        const solderingDetailsList = await SolderingModel.find({"productId":productId})
             .populate("barcodeImeiId", "imeiNo batchNo lotNo");
         if (solderingDetailsList.length === 0) {
             return res.status(200).json({
