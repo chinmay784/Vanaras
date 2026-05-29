@@ -1400,12 +1400,12 @@ exports.createFirmWare = async (req, res) => {
             });
         }
 
-        const { imeiNo, iccidNo } = req.body;
+        const { imeiNo, iccidNo ,productId} = req.body;
 
-        if (!imeiNo || !iccidNo) {
+        if (!imeiNo || !iccidNo || !productId) {
             return res.status(400).json({
                 success: false,
-                message: "imeiNo and iccidNo are required"
+                message: "imeiNo and iccidNo and productId are required"
             });
         }
 
@@ -1422,7 +1422,8 @@ exports.createFirmWare = async (req, res) => {
             createdId: userId,
             imeiNo,
             iccidNo,
-            slNo
+            slNo,
+            productId,
         });
 
         // 🔄 Update battery status if exists

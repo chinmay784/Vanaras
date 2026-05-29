@@ -8,6 +8,10 @@ const FirmWareSchema = new mongoose.Schema({
     imeiNo: { type: String, required: true, unique: true },
     iccidNo: { type: String, required: true, unique: true },
     slNo: { type: String, required: true, unique: true },
+    productId:{
+        type:mongoose.Schema.Types.ObjectId,
+        ref:"Product"
+    },
     firmWareStatus: {
         type: Boolean,
         default: false
