@@ -1390,6 +1390,51 @@ exports.getNextFirmwareSlNo = async (req, res) => {
 };
 
 
+
+// generate M6 Mopher Serial-No and Format is (SL No: TIAPL/MMYYYY/M6000001)
+function generateM6SerialNo(lastSlNo) {
+    const now = new Date();
+
+    // const day = String(now.getDate()).padStart(2, "0");
+    const month = String(now.getMonth() + 1).padStart(2, "0");
+    const year = now.getFullYear();
+
+    let nextNumber = 1; // default start number
+
+    if (lastSlNo) {
+        const match = lastSlNo.match(/M6(\d+)$/);
+        if (match) {
+            nextNumber = parseInt(match[1]) + 1;
+        }
+    }
+    return `TIAPL/${month}${year}/M6${String(nextNumber).padStart(7, "0")}`;
+}
+
+exports.getNextFirmwareSlNoForM6 = async (req, res) => {
+    try {
+        const lastFirmware = await FirmWareModel
+            .findOne({ slNo: { $regex: "^TIAPL/\\d{6}/M6" } })
+            .sort({ createdAt: -1 })
+            .select("slNo");
+        const nextSlNo = generateM6SerialNo(lastFirmware?.slNo);
+
+        return res.status(200).json({
+            success: true,
+            previousSlNo: lastFirmware?.slNo || null,
+            nextSlNo
+        });
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({
+            success: false,
+            message: "Error fetching next M6 firmware slNo"
+        });
+    }
+};
+
+
+
+
 exports.createFirmWare = async (req, res) => {
     try {
         const userId = req.user?.userId;
@@ -1792,7 +1837,7 @@ exports.FetchallQualityCheck = async (req, res) => {
         }
 
         // ✅ Fetch all QC data
-        const allQualityCheckData = await OcModel.find({"productId":productId});
+        const allQualityCheckData = await OcModel.find({ "productId": productId });
 
         if (!allQualityCheckData || allQualityCheckData.length === 0) {
             return res.status(200).json({
