@@ -1705,13 +1705,14 @@ exports.QualityCheck = async (req, res) => {
             labelPlaceMent,
             qrCodeRelaliablty,
             finalVisualInspection,
-            packingMatarialIntegraty
+            packingMatarialIntegraty,
+            productId
         } = req.body;
 
-        if (!imeiNo) {
+        if (!imeiNo || !productId) {
             return res.status(400).json({
                 success: false,
-                message: "Please Provide imeiNo"
+                message: "Please Provide imeiNo and productId"
             });
         }
 
@@ -1724,6 +1725,7 @@ exports.QualityCheck = async (req, res) => {
                 createdId: userId,
                 empName,
                 imeiNo,
+                productId,
                 probePin,
                 powerSupply,
                 capacitorBackup,
@@ -1739,7 +1741,7 @@ exports.QualityCheck = async (req, res) => {
                 labelPlaceMent,
                 qrCodeRelaliablty,
                 finalVisualInspection,
-                packingMatarialIntegraty
+                packingMatarialIntegraty,
             });
 
 

@@ -5,6 +5,10 @@ const OcModelSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
     },
+    productId:{
+        type: mongoose.Schema.Types.ObjectId,
+        ref:"Product",
+    },
     empName: {
         type: String,
         trim: true,
