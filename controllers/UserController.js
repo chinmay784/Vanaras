@@ -720,12 +720,12 @@ exports.addBarCode = async (req, res) => {
         }
 
 
-        const { batchNo, lotNo, imeiNo } = req.body;
+        const { batchNo, lotNo, imeiNo ,productId} = req.body;
 
-        if (!batchNo || !lotNo || !imeiNo) {
+        if (!batchNo || !lotNo || !imeiNo || !productId) {
             return res.status(200).json({
                 success: false,
-                message: 'Please Provide batchNo, lotNo, imeiNo'
+                message: 'Please Provide batchNo, lotNo, imeiNo and productId'
             })
         }
 
@@ -744,12 +744,13 @@ exports.addBarCode = async (req, res) => {
             createdId: userId,
             batchNo,
             lotNo,
-            imeiNo
+            imeiNo,
+            productId,
         });
 
         return res.status(200).json({
             success: true,
-            message: "addBarCode SuccessFully",
+            message: "BarCode Added SuccessFully",
         })
 
 
