@@ -1022,7 +1022,8 @@ exports.verifySolderingDetails = async (req, res) => {
             "__v",
             "status_Soldering",
             "batteryConnectionStatus",
-            "createdId"
+            "createdId",
+            "productId"
         ];
 
         const notTrueFields = Object.entries(detailsObject)
