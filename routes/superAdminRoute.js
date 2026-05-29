@@ -24,7 +24,7 @@ router.post("/addSolderingDetails",authMiddelWere,addSolderingDetails);
 router.post("/fetchSolderingDetailsandImeiNo",authMiddelWere,fetchSolderingDetailsandImeiNo);
 router.post("/verifySolderingDetails",authMiddelWere,verifySolderingDetails);
 router.post("/addBatteryConnectionDetails",authMiddelWere,addBatteryConnectionDetails);
-router.get("/fetchBatteryConnectionDetails",authMiddelWere,fetchBatteryConnectionDetails);
+router.post("/fetchBatteryConnectionDetails",authMiddelWere,fetchBatteryConnectionDetails);
 router.get("/getNextFirmwareSlNo",authMiddelWere,getNextFirmwareSlNo)
 router.post("/createFirmWare",authMiddelWere,createFirmWare);
 

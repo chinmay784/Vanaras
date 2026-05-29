@@ -1151,8 +1151,17 @@ exports.fetchBatteryConnectionDetails = async (req, res) => {
             })
         }
 
+        const { productId } = req.body;
+        if (!productId) {
+            return res.status(200).json({
+                success: false,
+                message: 'Please Provide productId'
+            })
+        }
+
+
         // fetch all Battery Connection details
-        const batteryConnectionDetailsList = await BatteryConnectionModel.find({});
+        const batteryConnectionDetailsList = await BatteryConnectionModel.find({"productId":productId });
         if (batteryConnectionDetailsList.length === 0) {
             return res.status(200).json({
                 success: false,
