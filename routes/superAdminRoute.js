@@ -27,7 +27,7 @@ router.post("/addBatteryConnectionDetails",authMiddelWere,addBatteryConnectionDe
 router.post("/fetchBatteryConnectionDetails",authMiddelWere,fetchBatteryConnectionDetails);
 router.get("/getNextFirmwareSlNo",authMiddelWere,getNextFirmwareSlNo)
 router.post("/createFirmWare",authMiddelWere,createFirmWare);
-router.get("/getNextFirmwareSlNoForM6",getNextFirmwareSlNoForM6)
+router.get("/getNextFirmwareSlNoForM6",authMiddelWere,getNextFirmwareSlNoForM6)
 
 router.post("/fetchFirmwareByImeiNo",authMiddelWere,fetchFirmwareByImeiNo);
 router.post("/editFirmWareDetails",authMiddelWere,editFirmWareDetails);
