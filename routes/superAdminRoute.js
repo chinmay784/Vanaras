@@ -21,7 +21,7 @@ router.post("/addBarCode",authMiddelWere,addBarCode);
 router.post("/fetchAllBarCodeIMEINo",authMiddelWere,fetchAllBarCodeIMEINo);
 router.post("/veriFyImeiNoAgain",authMiddelWere,veriFyImeiNoAgain);
 router.post("/addSolderingDetails",authMiddelWere,addSolderingDetails);
-router.get("/fetchSolderingDetailsandImeiNo",authMiddelWere,fetchSolderingDetailsandImeiNo);
+router.post("/fetchSolderingDetailsandImeiNo",authMiddelWere,fetchSolderingDetailsandImeiNo);
 router.post("/verifySolderingDetails",authMiddelWere,verifySolderingDetails);
 router.post("/addBatteryConnectionDetails",authMiddelWere,addBatteryConnectionDetails);
 router.get("/fetchBatteryConnectionDetails",authMiddelWere,fetchBatteryConnectionDetails);
