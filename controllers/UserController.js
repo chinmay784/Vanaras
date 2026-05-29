@@ -1706,7 +1706,6 @@ exports.QualityCheck = async (req, res) => {
             qrCodeRelaliablty,
             finalVisualInspection,
             packingMatarialIntegraty,
-            productId
         } = req.body;
 
         if (!imeiNo || !productId) {

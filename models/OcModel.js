@@ -57,10 +57,6 @@ const OcModelSchema = new mongoose.Schema({
         type: Boolean,
         default: false,
     },
-    productId: {
-        type: Boolean,
-        default: false,
-    },
     physicallyAssembly: {
         type: Boolean,
         default: false,
