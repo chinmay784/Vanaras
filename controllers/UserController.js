@@ -872,7 +872,7 @@ exports.addSolderingDetails = async (req, res) => {
             })
         }
 
-        const { barcodeImeiId, plus12v, gnd2, ignition, din1, din2, scs, led, sos4v, an1, an2, din3, op2, gnd13, op1, tx, rx, gnd17 ,productId } = req.body;
+        const { barcodeImeiId, plus12v, gnd2, ignition, din1, din2, scs, led, sos4v, an1, an2, din3, op2, gnd13, op1, tx, rx, gnd17, productId } = req.body;
 
         if (!barcodeImeiId || !plus12v || !gnd2 || !ignition || !din1 || !din2 || !scs || !led || !sos4v || !an1 || !an2 || !din3 || !op2 || !gnd13 || !op1 || !tx || !rx || !gnd17 || !productId) {
             return res.status(200).json({
@@ -950,7 +950,7 @@ exports.fetchSolderingDetailsandImeiNo = async (req, res) => {
 
 
         // fetch all Soldering details with imeiNo
-        const solderingDetailsList = await SolderingModel.find({"productId":productId})
+        const solderingDetailsList = await SolderingModel.find({ "productId": productId })
             .populate("barcodeImeiId", "imeiNo batchNo lotNo");
         if (solderingDetailsList.length === 0) {
             return res.status(200).json({
@@ -1070,7 +1070,7 @@ exports.addBatteryConnectionDetails = async (req, res) => {
             })
         }
 
-        const { imeiNo, batteryType, voltage, batteryConnectedStatus, capacitorConnectedStatus ,productId} = req.body;
+        const { imeiNo, batteryType, voltage, batteryConnectedStatus, capacitorConnectedStatus, productId } = req.body;
         if (!imeiNo || !batteryType || !voltage || !productId) {
             return res.status(200).json({
                 success: false,
@@ -1161,7 +1161,7 @@ exports.fetchBatteryConnectionDetails = async (req, res) => {
 
 
         // fetch all Battery Connection details
-        const batteryConnectionDetailsList = await BatteryConnectionModel.find({"productId":productId });
+        const batteryConnectionDetailsList = await BatteryConnectionModel.find({ "productId": productId });
         if (batteryConnectionDetailsList.length === 0) {
             return res.status(200).json({
                 success: false,
@@ -1400,7 +1400,7 @@ exports.createFirmWare = async (req, res) => {
             });
         }
 
-        const { imeiNo, iccidNo ,productId} = req.body;
+        const { imeiNo, iccidNo, productId } = req.body;
 
         if (!imeiNo || !iccidNo || !productId) {
             return res.status(400).json({
@@ -1629,7 +1629,7 @@ exports.fetchFirmWareDetails = async (req, res) => {
             });
         }
 
-        const {productId} = req.body;
+        const { productId } = req.body;
         if (!productId) {
             return res.status(401).json({
                 success: false,
@@ -1638,7 +1638,7 @@ exports.fetchFirmWareDetails = async (req, res) => {
         }
 
 
-        const firmWareDetailsList = await FirmWareModel.find({"productId":productId});
+        const firmWareDetailsList = await FirmWareModel.find({ "productId": productId });
 
         if (!firmWareDetailsList || firmWareDetailsList.length === 0) {
             return res.status(404).json({
@@ -1783,8 +1783,16 @@ exports.FetchallQualityCheck = async (req, res) => {
             });
         }
 
+        const { productId } = req.body;
+        if (!productId) {
+            return res.status(401).json({
+                success: false,
+                message: 'productId missing'
+            });
+        }
+
         // ✅ Fetch all QC data
-        const allQualityCheckData = await OcModel.find({});
+        const allQualityCheckData = await OcModel.find({"productId":productId});
 
         if (!allQualityCheckData || allQualityCheckData.length === 0) {
             return res.status(200).json({

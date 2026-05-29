@@ -34,7 +34,7 @@ router.post("/deleteFirmWareDetails",authMiddelWere,deleteFirmWareDetails)
 
 router.post("/fetchFirmWareDetails",authMiddelWere,fetchFirmWareDetails);
 router.post("/QualityCheck",authMiddelWere,QualityCheck);
-router.get("/FetchallQualityCheck",authMiddelWere,FetchallQualityCheck);
+router.post("/FetchallQualityCheck",authMiddelWere,FetchallQualityCheck);
 router.get("/getTodayFirmwareReport",authMiddelWere,getTodayFirmwareReport);
 router.post("/showAllDateReports",authMiddelWere,showAllDateReports);
 router.post("/fetchQCReport",authMiddelWere,fetchQCReport);
