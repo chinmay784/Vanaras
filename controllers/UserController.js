@@ -774,8 +774,19 @@ exports.fetchAllBarCodeIMEINo = async (req, res) => {
                 message: 'Please Provide UserId'
             })
         }
-        // fetch all BarCode IMEI No
-        const allBarCodeIMEINo = await AddBarcodeIMEINo.find({});
+
+        const {productId} = req.body;
+
+        if(!productId){
+            return res.status(200).json({
+                success:false,
+                message:"Please Provide ProductId"
+            })
+        }
+
+
+        // fetch all BarCode IMEI No On the Basis of ProductId
+        const allBarCodeIMEINo = await AddBarcodeIMEINo.find({ "productId": productId });
         if (allBarCodeIMEINo.length === 0) {
 
             return res.status(200).json({
