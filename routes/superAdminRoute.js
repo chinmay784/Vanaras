@@ -18,7 +18,7 @@ router.post("/createProduct",authMiddelWere,createProduct);
 router.get("/fetchProduct",authMiddelWere,fetchProduct);
 
 router.post("/addBarCode",authMiddelWere,addBarCode);
-router.get("/fetchAllBarCodeIMEINo",authMiddelWere,fetchAllBarCodeIMEINo);
+router.post("/fetchAllBarCodeIMEINo",authMiddelWere,fetchAllBarCodeIMEINo);
 router.post("/veriFyImeiNoAgain",authMiddelWere,veriFyImeiNoAgain);
 router.post("/addSolderingDetails",authMiddelWere,addSolderingDetails);
 router.get("/fetchSolderingDetailsandImeiNo",authMiddelWere,fetchSolderingDetailsandImeiNo);
