@@ -1455,9 +1455,7 @@ exports.createFirmWare = async (req, res) => {
         }
 
         // 🔍 Fetch last firmware
-        const lastFirmware = await FirmWareModel
-            .findOne({ slNo: { $regex: "^TIA/" } })
-            .sort({ createdAt: -1 });
+
 
         // Here work on Some new Things
 
@@ -1470,16 +1468,28 @@ exports.createFirmWare = async (req, res) => {
         }
 
 
+        let lastFirmware;
+        if (pro.productName === "AIS140") {
+            lastFirmware = await FirmWareModel
+                .findOne({ slNo: { $regex: "^TIA/" } })
+                .sort({ createdAt: -1 });
+        } else {
+            lastFirmware = await FirmWareModel
+                .findOne({ slNo: { $regex: "^TIAPL/" } })
+                .sort({ createdAt: -1 });
+        }
+
+
         // 🔢 Generate next slNo
         // const slNo = generateNextSlNo(lastFirmware?.slNo);
 
         let slNo;
 
-        if(pro.productName === "AIS140"){
+        if (pro.productName === "AIS140") {
             slNo = generateNextSlNo(lastFirmware?.slNo);
-        }else if(pro.productName === "M6 Mopher"){
+        } else if (pro.productName === "M6 Mopher") {
             slNo = generateM6SerialNo(lastFirmware?.slNo);
-        }else{
+        } else {
             return res.status(400).json({
                 success: false,
                 message: "Invalid product name"
@@ -2272,59 +2282,59 @@ exports.getTodayReport = async (req, res) => {
 
 
 // fetch Mopar Product Serial-No and Batch-No and Lot-No on the basis of IMEI-No (API)
-exports.fetchMoperProductDetailsOnTheBasisOfImeiNo = async (req,res) =>{
+exports.fetchMoperProductDetailsOnTheBasisOfImeiNo = async (req, res) => {
     try {
         const userId = req.user?.userId;
 
-        if(!userId){
+        if (!userId) {
             return res.status(401).json({
-                success:false,
-                message:'Please Provide UserId'
+                success: false,
+                message: 'Please Provide UserId'
             })
         }
 
         const { imeiNo } = req.body;
 
-        if(!imeiNo){
+        if (!imeiNo) {
             return res.status(400).json({
-                success:false,
-                message:'Please Provide imeiNo'
+                success: false,
+                message: 'Please Provide imeiNo'
             })
         }
 
         const firmWareDetails = await FirmWareModel.findOne({ imeiNo });
-        if(!firmWareDetails){
+        if (!firmWareDetails) {
             return res.status(404).json({
-                success:false,
-                message:'FirmWare Details not found for this imeiNo'
+                success: false,
+                message: 'FirmWare Details not found for this imeiNo'
             })
         }
 
         // and also find in AddBarcodeIMEINoModel to get batchNo and lotNo
-        const batchNo_lotNo = await AddBarcodeIMEINo.findOne({"imeiNo":imeiNo})
-        if(!batchNo_lotNo){
+        const batchNo_lotNo = await AddBarcodeIMEINo.findOne({ "imeiNo": imeiNo })
+        if (!batchNo_lotNo) {
             return res.status(400).json({
-                success:false,
-                message:"BatchMo or LotNo Not Found"
+                success: false,
+                message: "BatchMo or LotNo Not Found"
             })
         }
 
         return res.status(200).json({
-            success:true,
-            message:"Moper Product Details Fetched SuccessFully",
+            success: true,
+            message: "Moper Product Details Fetched SuccessFully",
             imeiNo,
             serialNo: firmWareDetails.slNo,
-            iccidNo:firmWareDetails.iccidNo,
+            iccidNo: firmWareDetails.iccidNo,
             batchNo: batchNo_lotNo.batchNo,
             lotNo: batchNo_lotNo.lotNo
         })
 
 
     } catch (error) {
-        console.log(error,error.message);
+        console.log(error, error.message);
         return res.status(500).json({
-            success:false,
-            message:"Server Error in fetchMoperProductDetailsOnTheBasisOfImeiNo" + `${error.message}`
+            success: false,
+            message: "Server Error in fetchMoperProductDetailsOnTheBasisOfImeiNo" + `${error.message}`
         })
     }
 }
