@@ -1459,8 +1459,32 @@ exports.createFirmWare = async (req, res) => {
             .findOne({ slNo: { $regex: "^TIA/" } })
             .sort({ createdAt: -1 });
 
+        // Here work on Some new Things
+
+        const pro = await Product.findById(productId);
+        if (!pro) {
+            return res.status(404).json({
+                success: false,
+                message: "Product not found"
+            });
+        }
+
+
         // 🔢 Generate next slNo
-        const slNo = generateNextSlNo(lastFirmware?.slNo);
+        // const slNo = generateNextSlNo(lastFirmware?.slNo);
+
+        let slNo;
+
+        if(pro.productName === "AIS140"){
+            slNo = generateNextSlNo(lastFirmware?.slNo);
+        }else if(pro.productName === "M6 Mopher"){
+            slNo = generateM6SerialNo(lastFirmware?.slNo);
+        }else{
+            return res.status(400).json({
+                success: false,
+                message: "Invalid product name"
+            });
+        }
 
         // 💾 Create firmware
         const firmWareDetails = await FirmWareModel.create({
