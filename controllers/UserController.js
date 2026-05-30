@@ -2246,3 +2246,61 @@ exports.getTodayReport = async (req, res) => {
 
 
 
+
+// fetch Mopar Product Serial-No and Batch-No and Lot-No on the basis of IMEI-No (API)
+exports.fetchMoperProductDetailsOnTheBasisOfImeiNo = async (req,res) =>{
+    try {
+        const userId = req.user?.userId;
+
+        if(!userId){
+            return res.status(401).json({
+                success:false,
+                message:'Please Provide UserId'
+            })
+        }
+
+        const { imeiNo } = req.body;
+
+        if(!imeiNo){
+            return res.status(400).json({
+                success:false,
+                message:'Please Provide imeiNo'
+            })
+        }
+
+        const firmWareDetails = await FirmWareModel.findOne({ imeiNo });
+        if(!firmWareDetails){
+            return res.status(404).json({
+                success:false,
+                message:'FirmWare Details not found for this imeiNo'
+            })
+        }
+
+        // and also find in AddBarcodeIMEINoModel to get batchNo and lotNo
+        const batchNo_lotNo = await AddBarcodeIMEINo.findOne({"imeiNo":imeiNo})
+        if(!batchNo_lotNo){
+            return res.status(400).json({
+                success:false,
+                message:"BatchMo or LotNo Not Found"
+            })
+        }
+
+        return res.status(200).json({
+            success:true,
+            message:"Moper Product Details Fetched SuccessFully",
+            imeiNo,
+            serialNo: firmWareDetails.slNo,
+            iccidNo:firmWareDetails.iccidNo,
+            batchNo: batchNo_lotNo.batchNo,
+            lotNo: batchNo_lotNo.lotNo
+        })
+
+
+    } catch (error) {
+        console.log(error,error.message);
+        return res.status(500).json({
+            success:false,
+            message:"Server Error in fetchMoperProductDetailsOnTheBasisOfImeiNo" + `${error.message}`
+        })
+    }
+}
