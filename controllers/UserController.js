@@ -1487,7 +1487,7 @@ exports.createFirmWare = async (req, res) => {
 
         if (pro.productName === "AIS140") {
             slNo = generateNextSlNo(lastFirmware?.slNo);
-        } else if (pro.productName === "M6 Mopher") {
+        } else if (pro.productName === "M6 DOUNGLE") {
             slNo = generateM6SerialNo(lastFirmware?.slNo);
         } else {
             return res.status(400).json({
