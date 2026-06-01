@@ -41,4 +41,3 @@ app.get("/", (req, res) => {
     res.send("🚀Traxo Production Server Is working")
 })
 
-console.log("Hello");
