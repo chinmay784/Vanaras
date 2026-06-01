@@ -2392,7 +2392,7 @@ exports.deleteImeiNo = async (req, res) => {
         // }
 
 
-        const deleteImei = await AddBarcodeIMEINo.findByIdAndDelete({imeiNo});
+        const deleteImei = await AddBarcodeIMEINo.findOneAndDelete({imeiNo});
         if(!deleteImei){
             return res.status(400).json({
                 success: false,
@@ -2506,6 +2506,7 @@ exports.editImeiNo = async (req, res) => {
 // // stellenties Work Project
 const axios = require("axios")
 const https = require("https");
+const FormData = require("form-data");
 exports.getStellentiesLoginApi = async (req, res) => {
     try {
         const { userName, password, accountId, clientId, clientSecret } = req.body;
@@ -2542,3 +2543,95 @@ exports.getStellentiesLoginApi = async (req, res) => {
         })
     }
 }
+
+
+
+
+// UploadIMEI To Stellenties
+exports.uploadIMEI = async (req, res) => {
+    try {
+
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: "CSV file is required"
+            });
+        }
+
+        //-------------------------------------
+        // STEP 1 : Login
+        //-------------------------------------
+
+        // const loginResponse = await axios.post(
+        //     "https://cvipiot-preprod.fca-india.com:40543/authentication/login",
+        //     {
+        //         userName: "admin",
+        //         password: "admin",
+        //         accountId: "primary",
+        //         clientId: "9iUsFkqpnxgu_AIrNG2dcgN4MoAa",
+        //         clientSecret: "ytRzDFAWFMfvnhJwVIv6NacfLmAa"
+        //     },
+        //     {
+        //         httpsAgent: new https.Agent({
+        //             rejectUnauthorized: false
+        //         })
+        //     }
+        // );
+
+        // const token =
+        //     loginResponse.data.access_token ||
+        //     loginResponse.data.token;
+
+        //-------------------------------------
+        // STEP 2 : Upload CSV
+        //-------------------------------------
+
+        const {token} = req.body
+
+        const formData = new FormData();
+
+        formData.append(
+            "file",
+            req.file.buffer,
+            req.file.originalname
+        );
+
+        const uploadResponse = await axios.post(
+            "https://cvipiot-preprod.fca-india.com:40543/jeep/bulkprovision/imei",
+            formData,
+            {
+                httpsAgent: new https.Agent({
+                    rejectUnauthorized: false
+                }),
+
+                headers: {
+                    ...formData.getHeaders(),
+                    Authorization: `Bearer ${token}`
+                },
+
+                maxBodyLength: Infinity,
+                maxContentLength: Infinity
+            }
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "IMEI Uploaded Successfully",
+            data: uploadResponse.data
+        });
+
+    } catch (error) {
+
+        console.log(
+            error.response?.data ||
+            error.message
+        );
+
+        return res.status(500).json({
+            success: false,
+            message:
+                error.response?.data ||
+                error.message
+        });
+    }
+};
