@@ -2338,3 +2338,207 @@ exports.fetchMoperProductDetailsOnTheBasisOfImeiNo = async (req, res) => {
         })
     }
 }
+
+
+
+// delete Imei No
+exports.deleteImeiNo = async (req, res) => {
+    try {
+        const userId = req.user?.userId;
+
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: 'Please Provide UserId'
+            })
+        }
+
+        const { imeiNo } = req.body;
+
+        if (!imeiNo) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please Provide imeiNo'
+            })
+        }
+
+        // // find and delete in AddBarcodeIMEINoModel
+        // const imeiDeleted = await AddBarcodeIMEINo.findOne({ imeiNo });
+        // // also delete in if exist in solderingModel
+
+        // const deleteOne = await SolderingModel.findOne({ "barcodeImeiId": imeiDeleted?._id });
+
+        // if (deleteOne) {
+        //     await SolderingModel.findOneAndDelete({ "barcodeImeiId": imeiDeleted._id })
+        // }
+
+        // // also delete in batteryConnectionModel
+        // const batteryImei = await BatteryConnectionModel.findOne({ imeiNo })
+
+        // if (batteryImei) {
+        //     await BatteryConnectionModel.findOneAndDelete({ imeiNo });
+        // }
+
+        // // also delete in firmwaremodel
+        // const firmwareImei = await FirmWareModel.findOne({ imeiNo })
+        // if (firmwareImei) {
+        //     await FirmWareModel.findOneAndDelete({ imeiNo });
+        // }
+
+        // // also delete in qc model
+        // const QcImei = await OcModel.findOne({ imeiNo })
+        // if (QcImei) {
+        //     await OcModel.findOneAndDelete({ imeiNo });
+        // }
+
+
+        const deleteImei = await AddBarcodeIMEINo.findByIdAndDelete({imeiNo});
+        if(!deleteImei){
+            return res.status(400).json({
+                success: false,
+                message: 'Data Not Found'
+            })
+        }
+
+        return res.status(200).json({
+            success: true,
+            message: `${imeiNo} Deleted SuccessFully`
+        })
+
+
+    } catch (error) {
+        console.log(error, error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server Error in deleteImeiNo" + `${error.message}`
+        })
+    }
+}
+
+// edit Imei No
+exports.editImeiNo = async (req, res) => {
+    try {
+        const userId = req.user.userId;
+
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: 'Please Provide UserId'
+            })
+        }
+
+        const { imeiNo, newImeiNo } = req.body;
+
+        if (!imeiNo || !newImeiNo) {
+            return res.status(400).json({
+                success: false,
+                message: 'Please Provide imeiNo and newImeiNo'
+            })
+        }
+
+        const addImei = await AddBarcodeIMEINo.findOne({ imeiNo });
+        if (!addImei) {
+            return res.status(400).json({
+                success: false,
+                message: 'Data Not Found'
+            })
+        }
+        addImei.imeiNo = newImeiNo;
+        await addImei.save()
+
+        // const batteryImei = await BatteryConnectionModel.findOne({ imeiNo });
+        // if (!batteryImei) {
+        //     return res.status(400).json({
+        //         success: false,
+        //         message: 'Data Not Found'
+        //     })
+        // }
+        // batteryImei.imeiNo = newImeiNo;
+        // await batteryImei.save()
+
+        // const firmwareImei = await FirmWareModel.findOne({ imeiNo });
+        // if (!firmwareImei) {
+        //     return res.status(400).json({
+        //         success: false,
+        //         message: 'Data Not Found'
+        //     })
+        // }
+        // firmwareImei.imeiNo = newImeiNo;
+        // await firmwareImei.save()
+
+        // const qcImei = await OcModel.findOne({ imeiNo });
+        // if (!qcImei) {
+        //     return res.status(400).json({
+        //         success: false,
+        //         message: 'Data Not Found'
+        //     })
+        // }
+        // qcImei.imeiNo = newImeiNo;
+        // await qcImei.save()
+
+
+        return res.status(200).json({
+            success:true,
+            message:`ImeiNo Edited Successfully`
+        })
+
+    } catch (error) {
+        console.log(error, error.message);
+        return res.status(500).json({
+            success: false,
+            message: 'Server Error in EditImeiNo'
+        })
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+// // stellenties Work Project
+const axios = require("axios")
+const https = require("https");
+exports.getStellentiesLoginApi = async (req, res) => {
+    try {
+        const { userName, password, accountId, clientId, clientSecret } = req.body;
+
+        if (!userName || !password || !accountId || !clientId || !clientSecret) {
+            return res.status(200).json({
+                success: false,
+                message: "Please Provide userName , password , accountId , clientId , clientSecret"
+            })
+        }
+
+        const response = await axios.post("https://cvipiot-preprod.fca-india.com:40543/authentication/login",
+
+            {
+                userName, password, accountId, clientId, clientSecret
+            },
+            {
+                httpsAgent: new https.Agent({
+                    rejectUnauthorized: false
+                })
+            }
+        )
+
+        return res.status(200).json({
+            success: true,
+            data: response.data,
+        });
+
+    } catch (error) {
+        console.log(error, error.message);
+        return res.status(500).json({
+            success: false,
+            message: "Server Error in getStellentiesLoginApi" + `${error.message}`
+        })
+    }
+}

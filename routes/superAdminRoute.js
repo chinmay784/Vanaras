@@ -1,5 +1,5 @@
 const express = require("express");
-const { createSuperAdmin, login, createDepartment, fetchAllDepartment, createHeadADepartment, fetchAllHeadDepartment, addEmployee, fetchAllEmployee, AssignWorkToEmployee, epartment_Head_Show_Assign_work_Employee, FetchLoginEmployeeWorkList, createProduct, fetchProduct, addBarCode, fetchAllBarCodeIMEINo, veriFyImeiNoAgain, addSolderingDetails, fetchSolderingDetailsandImeiNo, verifySolderingDetails, addBatteryConnectionDetails, fetchBatteryConnectionDetails, createFirmWare, fetchFirmWareDetails, QualityCheck, FetchallQualityCheck, getTodayFirmwareReport, showAllDateReports, fetchQCReport, getTodayReport, editFirmWareDetails, deleteFirmWareDetails, fetchFirmwareByImeiNo, getNextFirmwareSlNo, getNextFirmwareSlNoForM6, fetchMoperProductDetailsOnTheBasisOfImeiNo } = require("../controllers/UserController");
+const { createSuperAdmin, login, createDepartment, fetchAllDepartment, createHeadADepartment, fetchAllHeadDepartment, addEmployee, fetchAllEmployee, AssignWorkToEmployee, epartment_Head_Show_Assign_work_Employee, FetchLoginEmployeeWorkList, createProduct, fetchProduct, addBarCode, fetchAllBarCodeIMEINo, veriFyImeiNoAgain, addSolderingDetails, fetchSolderingDetailsandImeiNo, verifySolderingDetails, addBatteryConnectionDetails, fetchBatteryConnectionDetails, createFirmWare, fetchFirmWareDetails, QualityCheck, FetchallQualityCheck, getTodayFirmwareReport, showAllDateReports, fetchQCReport, getTodayReport, editFirmWareDetails, deleteFirmWareDetails, fetchFirmwareByImeiNo, getNextFirmwareSlNo, getNextFirmwareSlNoForM6, fetchMoperProductDetailsOnTheBasisOfImeiNo, getStellentiesLoginApi, deleteImeiNo, editImeiNo } = require("../controllers/UserController");
 const { authMiddelWere } = require("../middelWare/authMiddelWere");
 const router = express.Router()
 
@@ -44,5 +44,13 @@ router.get("/getTodayReport",authMiddelWere,getTodayReport);
 
 // _________________________ ----------- _________________________
 router.post("/fetchMoperProductDetailsOnTheBasisOfImeiNo",authMiddelWere,fetchMoperProductDetailsOnTheBasisOfImeiNo);
+router.post("/deleteImeiNo",authMiddelWere,deleteImeiNo);
+router.post("/editImeiNo",authMiddelWere,editImeiNo)
+
+
+
+// 
+router.post("/getStellentiesLoginApi",getStellentiesLoginApi)
+
 
 module.exports = router;
