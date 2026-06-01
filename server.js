@@ -40,3 +40,5 @@ app.listen(PORT, "0.0.0.0", () => {
 app.get("/", (req, res) => {
     res.send("🚀Traxo Production Server Is working")
 })
+
+console.log("Hello");
