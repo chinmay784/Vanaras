@@ -1413,7 +1413,7 @@ function generateM6SerialNo(lastSlNo) {
 exports.getNextFirmwareSlNoForM6 = async (req, res) => {
     try {
         const lastFirmware = await FirmWareModel
-            .findOne({ slNo: { $regex: "^TIAPL/\\d{6}/M6" } })
+            .findOne({ slNo: { $regex: "^TIAPL\\d{6}M6" } })
             .sort({ createdAt: -1 })
             .select("slNo");
         const nextSlNo = generateM6SerialNo(lastFirmware?.slNo);
