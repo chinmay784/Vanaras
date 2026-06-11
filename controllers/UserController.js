@@ -1407,7 +1407,7 @@ function generateM6SerialNo(lastSlNo) {
             nextNumber = parseInt(match[1]) + 1;
         }
     }
-    return `TIAPL/${month}${year}/M6${String(nextNumber).padStart(7, "0")}`;
+    return `TIAPL${month}${year}M6${String(nextNumber).padStart(7, "0")}`;
 }
 
 exports.getNextFirmwareSlNoForM6 = async (req, res) => {
@@ -2739,6 +2739,85 @@ exports.uploadIMEI = async (req, res) => {
         return res.status(500).json({
             success: false,
             error: error.response?.data || error.message
+        });
+    }
+};
+
+
+
+
+exports.uploadSupplierFeed = async (req, res) => {
+    try {
+
+        if (!req.file) {
+            return res.status(400).json({
+                success: false,
+                message: "CSV file is required"
+            });
+        }
+
+        const { token } = req.body;
+
+        if (!token) {
+            return res.status(400).json({
+                success: false,
+                message: "Token is required"
+            });
+        }
+
+        // CSV Preview
+        const csvContent = req.file.buffer.toString("utf8");
+
+        console.log("CSV Preview:");
+        console.log(csvContent);
+
+        const formData = new FormData();
+
+        formData.append(
+            "file",
+            req.file.buffer,
+            {
+                filename: req.file.originalname,
+                contentType: "text/csv"
+            }
+        );
+
+        const response = await axios.post(
+            "https://cvipiot-preprod.fca-india.com:40543/jeep/bulkprovision/dongle",
+            formData,
+            {
+                httpsAgent: new https.Agent({
+                    rejectUnauthorized: false
+                }),
+
+                headers: {
+                    ...formData.getHeaders(),
+                    Authorization: `Bearer ${token}`
+                },
+
+                maxBodyLength: Infinity,
+                maxContentLength: Infinity
+            }
+        );
+
+        return res.status(200).json({
+            success: true,
+            message: "Supplier Feed Uploaded Successfully",
+            data: response.data
+        });
+
+    } catch (error) {
+
+        console.log(
+            error.response?.data ||
+            error.message
+        );
+
+        return res.status(500).json({
+            success: false,
+            message:
+                error.response?.data ||
+                error.message
         });
     }
 };
