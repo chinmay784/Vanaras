@@ -1474,8 +1474,9 @@ exports.createFirmWare = async (req, res) => {
                 .findOne({ slNo: { $regex: "^TIA/" } })
                 .sort({ createdAt: -1 });
         } else {
+            // in this just i do TIPL/ to TIPL
             lastFirmware = await FirmWareModel
-                .findOne({ slNo: { $regex: "^TIAPL/" } })
+                .findOne({ slNo: { $regex: "^TIAPL" } })
                 .sort({ createdAt: -1 });
         }
 
@@ -2820,4 +2821,48 @@ exports.uploadSupplierFeed = async (req, res) => {
                 error.message
         });
     }
+};
+
+
+
+
+
+exports.getDevices = async (req, res) => {
+  try {
+    const { token } = req.body;
+
+    if (!token) {
+      return res.status(400).json({
+        success: false,
+        message: "Token is required",
+      });
+    }
+
+    const response = await axios.get(
+      "https://cvipiot-preprod.fca-india.com:40543/devices",
+      {
+        httpsAgent: new https.Agent({
+          rejectUnauthorized: false,
+        }),
+
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: "application/json",
+        },
+      }
+    );
+
+    return res.status(200).json({
+      success: true,
+      message: "Devices fetched successfully",
+      data: response.data,
+    });
+  } catch (error) {
+    console.error(error.response?.data || error.message);
+
+    return res.status(error.response?.status || 500).json({
+      success: false,
+      message: error.response?.data || error.message,
+    });
+  }
 };
